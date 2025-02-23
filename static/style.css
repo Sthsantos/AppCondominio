@@ -23,6 +23,10 @@ body {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
+    padding-bottom: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header (Comum para todas as páginas) */
@@ -32,7 +36,7 @@ header {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 900; /* Menor que o sidebar para não sobrepor */
 }
 
 .navbar {
@@ -407,6 +411,7 @@ header {
     max-width: 1200px;
     margin: 0 auto;
     gap: 20px;
+    flex: 1;
 }
 
 .content-container,
@@ -978,6 +983,106 @@ button:hover {
     opacity: 0.8;
 }
 
+/* Estilos para a barra inferior */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--header-color);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    z-index: 1000;
+}
+
+.bottom-nav a {
+    color: var(--link-color);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+.bottom-nav a i {
+    font-size: clamp(1.2em, 3vw, 1.5em);
+}
+
+.bottom-nav a span {
+    font-size: clamp(0.7em, 2vw, 0.9em);
+    margin-top: 2px;
+    display: none;
+}
+
+.bottom-nav a:hover,
+.bottom-nav a.active {
+    color: var(--primary-color);
+}
+
+/* Estilos para o menu lateral */
+.sidebar {
+    position: fixed;
+    top: 0; /* Começa no topo da página */
+    left: -250px; /* Escondido por padrão */
+    width: 250px;
+    height: 100%;
+    background-color: var(--input-bg);
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s ease;
+    z-index: 1000; /* Maior que o header */
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 20px;
+    margin-top: 50px; /* Espaço para o botão de toggle */
+}
+
+.sidebar li {
+    margin-bottom: 15px;
+}
+
+.sidebar a {
+    color: var(--text-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+.sidebar a i {
+    font-size: clamp(1em, 2.5vw, 1.2em);
+}
+
+.sidebar a:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+}
+
+/* Botão para abrir/fechar o menu lateral */
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--link-color);
+    font-size: clamp(1.2em, 3vw, 1.5em);
+    cursor: pointer;
+    padding: 10px;
+    position: absolute;
+    top: 10px;
+    left: 10px; /* Alinhado à esquerda dentro do sidebar */
+    z-index: 1001; /* Acima do sidebar */
+}
+
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
@@ -1081,6 +1186,10 @@ button:hover {
     .modal-image {
         max-height: 50vh;
     }
+
+    .bottom-nav a span {
+        display: block;
+    }
 }
 
 @media screen and (max-width: 480px) {
@@ -1143,5 +1252,17 @@ button:hover {
 
     .modal-details {
         font-size: clamp(0.8em, 2vw, 0.9em);
+    }
+
+    .bottom-nav a i {
+        font-size: clamp(1em, 2.5vw, 1.2em);
+    }
+
+    .bottom-nav a span {
+        font-size: clamp(0.6em, 1.8vw, 0.8em);
+    }
+
+    .sidebar {
+        width: 200px;
     }
 }
