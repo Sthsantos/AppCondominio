@@ -10,7 +10,7 @@ import firebase_admin
 from firebase_admin import credentials, messaging
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Use umaMagnus chave secreta forte em produção
+app.secret_key = 'your_secret_key_here'  # Use uma chave secreta forte em produção
 
 # Configuração para upload de arquivos
 UPLOAD_FOLDER = 'static/uploads'
@@ -25,8 +25,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['SESSION_TYPE'] = 'filesystem'  # Armazena sessões no sistema de arquivos
 Session(app)
 
-# Inicializar Firebase Admin SDK
-cred = credentials.Certificate('C:/Users/sthen/OneDrive/Área de Trabalho/APLCATIVOS APP/AppCondominio/firebase-adminsdk.json')  # Caminho corrigido
+# Inicializar Firebase Admin SDK com caminho relativo
+cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), 'firebase-adminsdk.json'))
 firebase_admin.initialize_app(cred)
 
 # Filtro personalizado para formatar datas
