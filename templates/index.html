@@ -16,13 +16,11 @@
     </script>
 </head>
 <body>
-    <!-- Botão fora do header, no topo da página -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">
-        <i class="fas fa-bars"></i>
-    </button>
-
     <header>
         <div class="navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo"></div>
         </div>
     </header>
@@ -33,10 +31,7 @@
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
-            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
-            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
-            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
-            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -102,56 +97,7 @@
         </section>
 
         <section class="features">
-            <!-- Opções comuns a todos os usuários -->
-            <a href="{{ url_for('reservas') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-calendar-alt feature-icon"></i>
-                    <h3>Reservas</h3>
-                    <p>Gerencie reservas de áreas comuns com facilidade.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('pagamentos') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-money-bill-wave feature-icon"></i>
-                    <h3>Pagamentos</h3>
-                    <p>Acompanhe os pagamentos de taxas do condomínio.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('perfil') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-user feature-icon"></i>
-                    <h3>Perfil</h3>
-                    <p>Gerencie suas informações pessoais e preferências.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('configuracoes') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-cog feature-icon"></i>
-                    <h3>Configurações</h3>
-                    <p>Ajuste as configurações do sistema conforme suas necessidades.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('manutencao') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-wrench feature-icon"></i>
-                    <h3>Manutenção</h3>
-                    <p>Solicite e acompanhe reparos e manutenções.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('correspondencias') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-envelope feature-icon"></i>
-                    <h3>Correspondências</h3>
-                    <p>Acompanhe a entrega de suas correspondências.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('feedback') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-comments feature-icon"></i>
-                    <h3>Feedback</h3>
-                    <p>Envie seus feedbacks e sugestões.</p>
-                </div>
-            </a>
+            <!-- Apenas os itens solicitados na tela inicial -->
             <a href="{{ url_for('moradores') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-users feature-icon"></i>
@@ -163,13 +109,6 @@
                     {% endif %}
                 </div>
             </a>
-            <a href="{{ url_for('anuncios') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-bullhorn feature-icon"></i>
-                    <h3>Anúncios</h3>
-                    <p>Veja e publique anúncios de compra, venda ou aluguel.</p>
-                </div>
-            </a>
             <a href="{{ url_for('forum') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-comment-dots feature-icon"></i>
@@ -177,44 +116,23 @@
                     <p>Participe de discussões da comunidade.</p>
                 </div>
             </a>
-
-            <!-- Opções exclusivas para administradores -->
+            <a href="{{ url_for('feedback') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-comments feature-icon"></i>
+                    <h3>Feedback</h3>
+                    <p>Envie seus feedbacks e sugestões.</p>
+                </div>
+            </a>
+            <a href="{{ url_for('correspondencias') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-envelope feature-icon"></i>
+                    <h3>Correspondências</h3>
+                    <p>Acompanhe a entrega de suas correspondências.</p>
+                </div>
+            </a>
+            <!-- Opções exclusivas para administradores mantidas na tela inicial apenas se necessário -->
             {% if session.get('tipo_usuario') == 'admin' %}
-                <a href="{{ url_for('comunicacao') }}" class="feature-link">
-                    <div class="feature">
-                        <i class="fas fa-bullhorn feature-icon"></i>
-                        <h3>Comunicação</h3>
-                        <p>Mantenha todos os moradores informados com avisos e comunicações internas.</p>
-                    </div>
-                </a>
-                <a href="{{ url_for('relatorios') }}" class="feature-link">
-                    <div class="feature">
-                        <i class="fas fa-chart-bar feature-icon"></i>
-                        <h3>Relatórios</h3>
-                        <p>Gere relatórios sobre reservas, pagamentos e outras atividades.</p>
-                    </div>
-                </a>
-                <a href="{{ url_for('estacionamento') }}" class="feature-link">
-                    <div class="feature">
-                        <i class="fas fa-car feature-icon"></i>
-                        <h3>Estacionamento e Veículos</h3>
-                        <p>Gerencie vagas de estacionamento e veículos.</p>
-                    </div>
-                </a>
-                <a href="{{ url_for('emergencias') }}" class="feature-link">
-                    <div class="feature">
-                        <i class="fas fa-exclamation-triangle feature-icon"></i>
-                        <h3>Emergências</h3>
-                        <p>Gerencie procedimentos e contatos para emergências.</p>
-                    </div>
-                </a>
-                <a href="{{ url_for('cadastro_moradores') }}" class="feature-link">
-                    <div class="feature">
-                        <i class="fas fa-user-plus feature-icon"></i>
-                        <h3>Cadastro de Moradores</h3>
-                        <p>Adicione novos moradores ao sistema.</p>
-                    </div>
-                </a>
+                <!-- Nenhum item admin adicional na tela inicial, todos já estão no menu lateral -->
             {% endif %}
         </section>
     </main>
