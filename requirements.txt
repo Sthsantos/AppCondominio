@@ -1,3 +1,6 @@
-flask
-flask-cors
+Flask
+Flask-Cors
 gunicorn
+Flask-Session
+Werkzeug
+firebase-admin
