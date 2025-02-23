@@ -6,8 +6,16 @@
     <title>Moradores Cadastrados - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <script>
+        function toggleDetails(moradorId) {
+            const details = document.getElementById('details-' + moradorId);
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+
         function toggleEditForm(moradorId) {
             const form = document.getElementById('edit-form-' + moradorId);
             if (form.style.display === 'none' || form.style.display === '') {
@@ -30,23 +38,45 @@
             const modal = document.getElementById('delete-modal');
             modal.style.display = 'none';
         }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
     </script>
 </head>
 <body>
     <header>
         <div class="navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo">Administração de Condomínios</div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
-                    {% if session.get('tipo_usuario') == 'admin' %}
-                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
-                    {% endif %}
-                </ul>
-            </nav>
         </div>
     </header>
+
+    <!-- Menu Lateral -->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
+            <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            {% if session.get('tipo_usuario') == 'admin' %}
+                <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
+                <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
+                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        </ul>
+    </nav>
+
     <main class="moradores-page">
         <section class="hero">
             <h1 class="animate-text">Moradores Cadastrados</h1>
@@ -55,67 +85,50 @@
             <div class="moradores-table-container">
                 <h2>Lista de Moradores</h2>
                 {% if moradores|length > 0 %}
-                    <table class="moradores-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Rua</th>
-                                <th>Número</th>
-                                <th>Garagem</th>
-                                <th>Tipo de Ocupação</th>
-                                {% if session.get('tipo_usuario') == 'admin' %}
-                                    <th>Ações</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for morador in moradores %}
-                            <tr>
-                                <td>{{ morador['nome'] }}</td>
-                                <td>{{ morador['email'] }}</td>
-                                <td>{{ morador['rua'] or 'Não informado' }}</td>
-                                <td>{{ morador['numero'] or 'Não informado' }}</td>
-                                <td>{{ morador['garagem'] or 'Não informado' }}</td>
-                                <td>{{ morador['tipo_ocupacao'] or 'Não informado' }}</td>
-                                {% if session.get('tipo_usuario') == 'admin' %}
-                                    <td>
-                                        <button onclick="toggleEditForm({{ morador['id'] }})" class="btn-edit">
-                                            <i class="fas fa-edit"></i> Editar
-                                        </button>
-                                        <button onclick="showDeleteModal({{ morador['id'] }})" class="btn-delete">
-                                            <i class="fas fa-trash"></i> Excluir
-                                        </button>
-                                        <form id="delete-form-{{ morador['id'] }}" method="POST" action="{{ url_for('excluir_morador', morador_id=morador['id']) }}" style="display: none;"></form>
-                                    </td>
-                                {% endif %}
-                            </tr>
-                            {% if session.get('tipo_usuario') == 'admin' %}
-                            <tr>
-                                <td colspan="7">
-                                    <div id="edit-form-{{ morador['id'] }}" class="edit-form" style="display: none;">
-                                        <form method="POST" action="{{ url_for('editar_morador', morador_id=morador['id']) }}">
-                                            <label for="nome_{{ morador['id'] }}">Nome:</label>
-                                            <input type="text" id="nome_{{ morador['id'] }}" name="nome" value="{{ morador['nome'] }}" required>
-                                            <label for="email_{{ morador['id'] }}">Email:</label>
-                                            <input type="email" id="email_{{ morador['id'] }}" name="email" value="{{ morador['email'] }}" required>
-                                            <label for="rua_{{ morador['id'] }}">Rua:</label>
-                                            <input type="text" id="rua_{{ morador['id'] }}" name="rua" value="{{ morador['rua'] or '' }}">
-                                            <label for="numero_{{ morador['id'] }}">Número:</label>
-                                            <input type="text" id="numero_{{ morador['id'] }}" name="numero" value="{{ morador['numero'] or '' }}">
-                                            <label for="garagem_{{ morador['id'] }}">Garagem:</label>
-                                            <input type="text" id="garagem_{{ morador['id'] }}" name="garagem" value="{{ morador['garagem'] or '' }}">
-                                            <label for="tipo_ocupacao_{{ morador['id'] }}">Tipo de Ocupação:</label>
-                                            <input type="text" id="tipo_ocupacao_{{ morador['id'] }}" name="tipo_ocupacao" value="{{ morador['tipo_ocupacao'] or '' }}">
-                                            <input type="submit" value="Salvar Alterações">
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <ul class="moradores-list">
+                        {% for morador in moradores %}
+                            <li>
+                                <span class="morador-name" onclick="toggleDetails({{ morador['id'] }})">
+                                    {{ morador['nome'] }} <i class="fas fa-caret-down"></i>
+                                </span>
+                                <div id="details-{{ morador['id'] }}" class="morador-details" style="display: none;">
+                                    <p><strong>Email:</strong> {{ morador['email'] }}</p>
+                                    <p><strong>Rua:</strong> {{ morador['rua'] or 'Não informado' }}</p>
+                                    <p><strong>Número:</strong> {{ morador['numero'] or 'Não informado' }}</p>
+                                    <p><strong>Garagem:</strong> {{ morador['garagem'] or 'Não informado' }}</p>
+                                    <p><strong>Tipo de Ocupação:</strong> {{ morador['tipo_ocupacao'] or 'Não informado' }}</p>
+                                    {% if session.get('tipo_usuario') == 'admin' %}
+                                        <div class="aviso-actions">
+                                            <button onclick="toggleEditForm({{ morador['id'] }})" class="btn-edit">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </button>
+                                            <button onclick="showDeleteModal({{ morador['id'] }})" class="btn-delete">
+                                                <i class="fas fa-trash"></i> Excluir
+                                            </button>
+                                            <form id="delete-form-{{ morador['id'] }}" method="POST" action="{{ url_for('excluir_morador', morador_id=morador['id']) }}" style="display: none;"></form>
+                                        </div>
+                                        <div id="edit-form-{{ morador['id'] }}" class="edit-form" style="display: none;">
+                                            <form method="POST" action="{{ url_for('editar_morador', morador_id=morador['id']) }}">
+                                                <label for="nome_{{ morador['id'] }}">Nome:</label>
+                                                <input type="text" id="nome_{{ morador['id'] }}" name="nome" value="{{ morador['nome'] }}" required>
+                                                <label for="email_{{ morador['id'] }}">Email:</label>
+                                                <input type="email" id="email_{{ morador['id'] }}" name="email" value="{{ morador['email'] }}" required>
+                                                <label for="rua_{{ morador['id'] }}">Rua:</label>
+                                                <input type="text" id="rua_{{ morador['id'] }}" name="rua" value="{{ morador['rua'] or '' }}">
+                                                <label for="numero_{{ morador['id'] }}">Número:</label>
+                                                <input type="text" id="numero_{{ morador['id'] }}" name="numero" value="{{ morador['numero'] or '' }}">
+                                                <label for="garagem_{{ morador['id'] }}">Garagem:</label>
+                                                <input type="text" id="garagem_{{ morador['id'] }}" name="garagem" value="{{ morador['garagem'] or '' }}">
+                                                <label for="tipo_ocupacao_{{ morador['id'] }}">Tipo de Ocupação:</label>
+                                                <input type="text" id="tipo_ocupacao_{{ morador['id'] }}" name="tipo_ocupacao" value="{{ morador['tipo_ocupacao'] or '' }}">
+                                                <input type="submit" value="Salvar Alterações">
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
                     <p class="no-data">Nenhum morador cadastrado no momento.</p>
                 {% endif %}
@@ -135,5 +148,25 @@
         </div>
         {% endif %}
     </main>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anúncios</span>
+        </a>
+        <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Reservas</span>
+        </a>
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' and session.get('tipo_usuario') == 'admin' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Mensagens</span>
+        </a>
+    </nav>
 </body>
 </html>
