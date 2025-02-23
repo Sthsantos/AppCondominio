@@ -6,8 +6,54 @@
     <title>Painel de Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
     <script>
+        // Configuração do Firebase (substitua pelos valores do seu projeto no Firebase Console)
+        const firebaseConfig = {
+            apiKey: "sua_api_key",
+            authDomain: "seu_projeto.firebaseapp.com",
+            projectId: "seu_projeto",
+            storageBucket: "seu_projeto.appspot.com",
+            messagingSenderId: "seu_sender_id",
+            appId: "seu_app_id"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        // Função para registrar o token FCM
+        function registerPush() {
+            messaging.requestPermission().then(() => {
+                return messaging.getToken();
+            }).then((token) => {
+                fetch('/register_token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                }).then(response => console.log('Token registrado:', response));
+            }).catch((err) => {
+                console.error('Erro ao registrar push:', err);
+            });
+        }
+
+        // Receber notificações em foreground
+        messaging.onMessage((payload) => {
+            console.log('Notificação recebida:', payload);
+            alert(payload.notification.body); // Exemplo simples de exibição
+        });
+
+        // Registrar o Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then((reg) => {
+                    console.log('Service Worker registrado', reg);
+                    registerPush(); // Registrar o token após o Service Worker estar pronto
+                })
+                .catch((err) => console.error('Erro ao registrar Service Worker', err));
+        }
+
         // Função para abrir/fechar o menu lateral
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
