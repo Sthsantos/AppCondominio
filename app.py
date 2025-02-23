@@ -177,13 +177,20 @@ def get_db_connection():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER,
         tipo TEXT NOT NULL,
-        titulo TEXT NOT NULL,
         descricao TEXT NOT NULL,
         data_criacao TIMESTAMP,
-        imagem TEXT,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
+    # Adicionar colunas 'titulo' e 'imagem' se não existirem
+    try:
+        cursor.execute('ALTER TABLE anuncios ADD COLUMN titulo TEXT NOT NULL DEFAULT ""')
+    except sqlite3.OperationalError:
+        pass  # Coluna já existe
+    try:
+        cursor.execute('ALTER TABLE anuncios ADD COLUMN imagem TEXT')
+    except sqlite3.OperationalError:
+        pass  # Coluna já existe
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS forum_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
