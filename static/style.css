@@ -246,7 +246,7 @@ header {
 .form-container input[type="email"],
 .form-container input[type="password"],
 .form-container input[type="number"],
-.form-container input[type="file"] { /* Adicionado para upload de arquivos */
+.form-container input[type="file"] {
     width: 100%;
     padding: 10px;
     background-color: var(--input-bg);
@@ -269,7 +269,7 @@ header {
 .form-container input[type="email"]:focus,
 .form-container input[type="password"]:focus,
 .form-container input[type="text"]:focus,
-.form-container input[type="file"]:focus { /* Adicionado para consistência */
+.form-container input[type="file"]:focus {
     border-color: var(--primary-color);
     background-color: var(--input-focus);
     outline: none;
@@ -380,7 +380,7 @@ header {
 .estacionamento-page .hero,
 .emergencias-page .hero,
 .cadastro-moradores-page .hero,
-.anuncios-page .hero { /* Adicionado para anuncios.html */
+.anuncios-page .hero {
     padding: clamp(20px, 5vw, 30px) 1rem;
     background: linear-gradient(135deg, var(--header-color), var(--background-color));
     text-align: center;
@@ -393,7 +393,7 @@ header {
 .estacionamento-page .hero h1,
 .emergencias-page .hero h1,
 .cadastro-moradores-page .hero h1,
-.anuncios-page .hero h1 { /* Adicionado para anuncios.html */
+.anuncios-page .hero h1 {
     color: var(--primary-color);
     font-size: clamp(1.5em, 5vw, 2.5em);
     animation: pulse 2s infinite;
@@ -412,7 +412,7 @@ header {
 .content-container,
 .form-container,
 .reservas-list,
-.anuncios-list-container { /* Adicionado para anuncios.html */
+.anuncios-list-container {
     flex: 1;
     min-width: 300px;
     margin: 10px;
@@ -430,7 +430,7 @@ header {
 
 .form-container h2,
 .reservas-list h2,
-.anuncios-list-container h2 { /* Adicionado para anuncios.html */
+.anuncios-list-container h2 {
     color: var(--primary-color);
     margin-top: 0;
     font-size: clamp(1.2em, 3vw, 1.5em);
@@ -490,7 +490,7 @@ button:hover {
 .correspondencias-list,
 .veiculos-list,
 .emergencias-list,
-.anuncios-list { /* Adicionado para anuncios.html */
+.anuncios-list {
     list-style-type: none;
     padding: 0;
 }
@@ -501,7 +501,7 @@ button:hover {
 .correspondencias-list li,
 .veiculos-list li,
 .emergencias-list li,
-.anuncios-list li { /* Adicionado para anuncios.html */
+.anuncios-list li {
     background-color: var(--input-bg);
     margin: 10px 0;
     padding: 10px;
@@ -515,7 +515,7 @@ button:hover {
 .feedbacks-list li:hover,
 .correspondencias-list li:hover,
 .veiculos-list li:hover,
-.anuncios-list li:hover { /* Adicionado para anuncios.html */
+.anuncios-list li:hover {
     background-color: var(--input-focus);
 }
 
@@ -936,6 +936,48 @@ button:hover {
     font-size: clamp(0.9em, 2.5vw, 1.1em);
 }
 
+/* Estilos para o modal de imagem */
+.image-modal-content {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-image {
+    max-width: 100%;
+    max-height: 60vh;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-details {
+    font-size: clamp(0.9em, 2.5vw, 1.1em);
+    text-align: left;
+}
+
+/* Ajustes na imagem pequena para indicar clicabilidade */
+.anuncio-imagem {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 4px;
+    max-height: 200px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.anuncio-imagem:hover {
+    opacity: 0.8;
+}
+
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
@@ -1031,6 +1073,14 @@ button:hover {
     .anuncio-imagem {
         max-height: 150px;
     }
+
+    .image-modal-content {
+        max-width: 90%;
+    }
+
+    .modal-image {
+        max-height: 50vh;
+    }
 }
 
 @media screen and (max-width: 480px) {
@@ -1081,5 +1131,17 @@ button:hover {
 
     .anuncio-imagem {
         max-height: 100px;
+    }
+
+    .image-modal-content {
+        padding: 10px;
+    }
+
+    .modal-image {
+        max-height: 40vh;
+    }
+
+    .modal-details {
+        font-size: clamp(0.8em, 2vw, 0.9em);
     }
 }
