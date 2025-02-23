@@ -37,37 +37,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Verifica se estamos na página inicial para registrar notificações push
     if (document.querySelector('.hero h1.animate-text')) { // Identifica a página inicial
-        // Inicializar Firebase (movido do inline HTML)
+        // Configuração do Firebase para appcondominio-2fcac
         const firebaseConfig = {
-            apiKey: "sua_api_key",
-            authDomain: "seu_projeto.firebaseapp.com",
-            projectId: "seu_projeto",
-            storageBucket: "seu_projeto.appspot.com",
-            messagingSenderId: "seu_sender_id",
-            appId: "seu_app_id"
+            apiKey: "SUBSTITUA_PELA_API_KEY", // Obtenha no Firebase Console
+            authDomain: "appcondominio-2fcac.firebaseapp.com",
+            projectId: "appcondominio-2fcac",
+            storageBucket: "appcondominio-2fcac.appspot.com",
+            messagingSenderId: "117990932930345036538", // Aproximado do client_id, verifique no Firebase Console
+            appId: "SUBSTITUA_PELO_APP_ID" // Obtenha no Firebase Console
         };
 
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
 
         // Função para registrar o token FCM
         function registerPush() {
-            messaging.requestPermission().then(() => {
-                return messaging.getToken({ vapidKey: 'SEU_VAPID_KEY_AQUI' }); // Adicione a chave VAPID se necessário
-            }).then((token) => {
-                fetch('/register_token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token })
-                }).then(response => console.log('Token registrado:', response));
-            }).catch((err) => {
-                console.error('Erro ao registrar push:', err);
-            });
+            messaging.requestPermission()
+                .then(() => {
+                    return messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }); // Substitua pela chave VAPID
+                })
+                .then((token) => {
+                    console.log('Token FCM gerado:', token);
+                    fetch('/register_token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    })
+                    .then(response => response.text())
+                    .then(text => console.log('Resposta do backend:', text))
+                    .catch(err => console.error('Erro ao enviar token ao backend:', err));
+                })
+                .catch((err) => {
+                    console.error('Erro ao obter permissão ou token FCM:', err);
+                });
         }
 
         // Receber notificações em foreground
         messaging.onMessage((payload) => {
-            console.log('Notificação recebida:', payload);
+            console.log('Notificação recebida em foreground:', payload);
             alert(payload.notification.body); // Exemplo simples de exibição
         });
 
@@ -75,10 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/static/sw.js')
                 .then((reg) => {
-                    console.log('Service Worker registrado', reg);
+                    console.log('Service Worker registrado com sucesso:', reg);
                     registerPush(); // Registrar o token após o Service Worker estar pronto
                 })
-                .catch((err) => console.error('Erro ao registrar Service Worker', err));
+                .catch((err) => {
+                    console.error('Erro ao registrar Service Worker:', err);
+                });
+        } else {
+            console.error('Service Workers não são suportados neste navegador.');
         }
     }
 });
