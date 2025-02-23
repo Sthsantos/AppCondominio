@@ -28,8 +28,11 @@ body {
 /* Header (Comum para todas as páginas) */
 header {
     background-color: var(--header-color);
-    padding: 1rem 0;
+    padding: clamp(0.5rem, 2vw, 1rem) 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar {
@@ -38,28 +41,31 @@ header {
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 clamp(1rem, 3vw, 2rem);
+    flex-wrap: nowrap; /* Mantém ícones lado a lado por padrão */
 }
 
 .logo {
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: clamp(1.2em, 4vw, 1.5em);
     color: var(--link-color);
 }
 
 .menu {
     list-style: none;
     display: flex;
+    gap: clamp(5px, 1vw, 15px);
+    align-items: center;
 }
 
 .menu li {
-    margin-left: 15px;
+    margin: 0; /* Remove margens extras */
 }
 
 .menu a {
     color: var(--link-color);
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: clamp(0.3rem, 1vw, 0.5rem) clamp(0.5rem, 1.5vw, 1rem);
     transition: background-color 0.3s, color 0.3s;
     border-radius: 4px;
     display: flex;
@@ -68,7 +74,7 @@ header {
 }
 
 .menu a i {
-    font-size: 1.5em;
+    font-size: clamp(1em, 3vw, 1.5em);
 }
 
 .menu a:hover {
@@ -79,26 +85,20 @@ header {
 /* Estilos para index.html */
 .hero {
     text-align: center;
-    padding: 50px 0;
+    padding: clamp(20px, 5vw, 50px) 1rem;
     background: linear-gradient(135deg, var(--header-color), var(--background-color));
 }
 
 .animate-text {
-    font-size: 2.5em;
+    font-size: clamp(1.5em, 5vw, 2.5em);
     color: var(--primary-color);
     animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 /* Nova seção de comunicados */
@@ -109,22 +109,22 @@ header {
 }
 
 .comunicados h2 {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
     margin-bottom: 20px;
     color: var(--primary-color);
     text-align: center;
 }
 
 .avisos, .mensagens {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     background-color: #333;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .avisos h3, .mensagens h3 {
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
     color: var(--primary-color);
     margin-bottom: 15px;
 }
@@ -136,7 +136,7 @@ header {
 
 .avisos li, .mensagens li {
     background-color: var(--input-bg);
-    padding: 15px;
+    padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
     transition: background-color 0.3s;
@@ -148,18 +148,18 @@ header {
 
 .avisos li strong, .mensagens li strong {
     color: var(--primary-color);
-    font-size: 1.1em;
+    font-size: clamp(0.9em, 2.5vw, 1.1em);
 }
 
 .avisos p, .mensagens p {
     margin: 5px 0 0;
     color: var(--text-color);
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .features {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     padding: 20px;
     max-width: 1200px;
@@ -178,30 +178,30 @@ header {
 
 .feature {
     background-color: #333;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
     text-align: center;
-    height: 100%;
+    min-height: 150px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 .feature-icon {
-    font-size: 2em;
+    font-size: clamp(1.5em, 4vw, 2em);
     color: var(--primary-color);
 }
 
 .feature h3 {
-    font-size: 1.2em;
+    font-size: clamp(1em, 3vw, 1.2em);
     color: var(--primary-color);
     margin: 10px 0;
 }
 
 .feature p {
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2.5vw, 0.9em);
     margin: 0;
     flex-grow: 1;
 }
@@ -211,15 +211,16 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 60px);
+    min-height: calc(100vh - 60px);
     background: url('/static/login-background.jpg') no-repeat center center fixed;
     background-size: cover;
     background-color: var(--background-color);
+    padding: 20px;
 }
 
 .login-form, .form-container {
     background-color: rgba(51, 51, 51, 0.9);
-    padding: 30px;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -231,6 +232,7 @@ header {
 .login-form h1, .form-container h2 {
     margin-bottom: 20px;
     color: var(--primary-color);
+    font-size: clamp(1.5em, 4vw, 2em);
 }
 
 .form-group {
@@ -245,12 +247,12 @@ header {
 .form-container input[type="password"],
 .form-container input[type="number"] {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-color);
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
     transition: border-color 0.3s, background-color 0.3s;
 }
 
@@ -283,15 +285,11 @@ header {
     border: none;
     color: white;
     padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
     border-radius: 4px;
+    cursor: pointer;
     transition: background-color 0.3s;
     width: 100%;
+    font-size: clamp(0.9em, 2.5vw, 1em);
 }
 
 .btn-login:hover, .form-container input[type="submit"]:hover {
@@ -305,6 +303,7 @@ header {
     border-radius: 4px;
     margin-top: 15px;
     text-align: center;
+    font-size: clamp(0.9em, 2.5vw, 1em);
 }
 
 /* Estilos para a página de comunicação */
@@ -315,6 +314,7 @@ header {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    gap: 20px;
 }
 
 .comunicacao-page .form-container,
@@ -333,18 +333,19 @@ header {
     display: block;
     margin-bottom: 5px;
     color: var(--text-color);
+    font-size: clamp(0.9em, 2.5vw, 1em);
 }
 
 .comunicacao-page .form-container select,
 .comunicacao-page .form-container input[type="text"],
 .comunicacao-page .form-container textarea {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-color);
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
     margin-bottom: 10px;
     transition: border-color 0.3s, background-color 0.3s;
 }
@@ -365,37 +366,10 @@ header {
 .comunicacao-page .mensagens-list h2 {
     color: var(--primary-color);
     margin-top: 0;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.5em;
+    font-size: clamp(1.2em, 3vw, 1.5em);
 }
 
-.comunicacao-page .avisos-list ul,
-.comunicacao-page .mensagens-list ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.comunicacao-page .avisos-list li,
-.comunicacao-page .mensagens-list li {
-    background-color: var(--input-bg);
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.comunicacao-page .avisos-list li:hover,
-.comunicacao-page .mensagens-list li:hover {
-    background-color: var(--input-focus);
-}
-
-.comunicacao-page .avisos-list li strong,
-.comunicacao-page .mensagens-list li strong {
-    color: var(--primary-color);
-    font-size: 1.1em;
-}
-
-/* Estilos para a página de reservas e outras */
+/* Estilos para outras páginas */
 .reservas-page .hero,
 .manutencao-page .hero,
 .feedback-page .hero,
@@ -403,7 +377,7 @@ header {
 .estacionamento-page .hero,
 .emergencias-page .hero,
 .cadastro-moradores-page .hero {
-    padding: 30px 0;
+    padding: clamp(20px, 5vw, 30px) 1rem;
     background: linear-gradient(135deg, var(--header-color), var(--background-color));
     text-align: center;
 }
@@ -416,7 +390,7 @@ header {
 .emergencias-page .hero h1,
 .cadastro-moradores-page .hero h1 {
     color: var(--primary-color);
-    font-size: 2.5em;
+    font-size: clamp(1.5em, 5vw, 2.5em);
     animation: pulse 2s infinite;
 }
 
@@ -427,6 +401,7 @@ header {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    gap: 20px;
 }
 
 .content-container,
@@ -451,8 +426,7 @@ header {
 .reservas-list h2 {
     color: var(--primary-color);
     margin-top: 0;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.5em;
+    font-size: clamp(1.2em, 3vw, 1.5em);
 }
 
 .form-container input[type="text"],
@@ -461,12 +435,12 @@ header {
 .form-container select,
 .form-container textarea {
     width: 100%;
-    padding: 12px 15px;
+    padding: 10px;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-color);
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
     margin-bottom: 10px;
     transition: border-color 0.3s, background-color 0.3s;
 }
@@ -495,7 +469,7 @@ button {
     border-radius: 4px;
     transition: background-color 0.3s;
     width: 100%;
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
 }
 
 .form-container input[type="submit"]:hover,
@@ -524,6 +498,7 @@ button:hover {
     padding: 10px;
     border-radius: 4px;
     transition: background-color 0.3s;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .reservas-list li:hover,
@@ -546,7 +521,7 @@ button:hover {
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s;
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .reservas-list button:hover {
@@ -563,7 +538,7 @@ button:hover {
 
 .status-form label {
     color: var(--text-color);
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .status-form select {
@@ -572,7 +547,7 @@ button:hover {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-color);
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
     transition: border-color 0.3s, background-color 0.3s;
 }
 
@@ -584,25 +559,25 @@ button:hover {
 
 .status-form button {
     padding: 5px 10px;
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 /* Estilos para a página de administração */
 .admin-page .hero {
-    padding: 30px 0;
+    padding: clamp(20px, 5vw, 30px) 1rem;
     background: linear-gradient(135deg, var(--header-color), var(--background-color));
     text-align: center;
 }
 
 .admin-page .hero h1 {
     color: var(--primary-color);
-    font-size: 2.5em;
+    font-size: clamp(1.5em, 5vw, 2.5em);
     animation: pulse 2s infinite;
 }
 
 .admin-features {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     padding: 20px;
     max-width: 1200px;
@@ -611,12 +586,12 @@ button:hover {
 
 .admin-features .feature {
     background-color: #333;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
     text-align: center;
-    height: 100%;
+    min-height: 150px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -628,18 +603,18 @@ button:hover {
 }
 
 .admin-features .feature-icon {
-    font-size: 2em;
+    font-size: clamp(1.5em, 4vw, 2em);
     color: var(--primary-color);
 }
 
 .admin-features h3 {
-    font-size: 1.2em;
+    font-size: clamp(1em, 3vw, 1.2em);
     color: var(--primary-color);
     margin: 10px 0;
 }
 
 .admin-features p {
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2.5vw, 0.9em);
     margin: 0;
     flex-grow: 1;
 }
@@ -653,7 +628,7 @@ button:hover {
     border-radius: 4px;
     transition: background-color 0.3s;
     width: 100%;
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
     text-decoration: none;
     display: inline-block;
     text-align: center;
@@ -666,7 +641,7 @@ button:hover {
 /* Estilos para o quadro de moradores */
 .moradores-box {
     background-color: #333;
-    padding: 20px;
+    padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
@@ -681,7 +656,7 @@ button:hover {
 }
 
 .moradores-box .morador-icon {
-    font-size: 2em;
+    font-size: clamp(1.5em, 4vw, 2em);
     color: var(--primary-color);
     position: absolute;
     top: 10px;
@@ -689,13 +664,13 @@ button:hover {
 }
 
 .moradores-box h3 {
-    font-size: 1.2em;
+    font-size: clamp(1em, 3vw, 1.2em);
     color: var(--primary-color);
     margin-bottom: 10px;
 }
 
 .moradores-box p {
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2.5vw, 0.9em);
     margin: 5px 0;
 }
 
@@ -715,7 +690,7 @@ button:hover {
 
 .moradores-table-container h2 {
     color: var(--primary-color);
-    font-size: 1.5em;
+    font-size: clamp(1.2em, 3vw, 1.5em);
     margin-bottom: 20px;
     text-align: center;
 }
@@ -729,9 +704,10 @@ button:hover {
 
 .moradores-table th,
 .moradores-table td {
-    padding: 12px 15px;
+    padding: 10px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .moradores-table th {
@@ -739,11 +715,10 @@ button:hover {
     color: white;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 0.9em;
 }
 
 .moradores-table tr:nth-child(even) {
-    background-color: #3a3a3a; /* Cor ligeiramente mais clara para linhas pares */
+    background-color: #3a3a3a;
 }
 
 .moradores-table tr:hover {
@@ -758,29 +733,28 @@ button:hover {
     background: transparent;
     border: none;
     width: 100%;
-    display: table-row; /* Faz o formulário se comportar como uma linha da tabela */
+    display: table-row;
 }
 
 .moradores-table .edit-form td {
-    padding: 12px 15px;
+    padding: 10px;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-color);
 }
 
 .moradores-table .edit-form label {
-    display: none; /* Esconde os rótulos para manter o layout limpo */
+    display: none;
 }
 
 .moradores-table .edit-form input[type="text"],
 .moradores-table .edit-form input[type="email"] {
     width: 100%;
     padding: 8px;
-    margin: 0;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-color);
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
     transition: border-color 0.3s, background-color 0.3s;
 }
 
@@ -800,7 +774,7 @@ button:hover {
     border-radius: 4px;
     transition: background-color 0.3s;
     width: auto;
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
 .moradores-table .edit-form input[type="submit"]:hover {
@@ -822,7 +796,7 @@ button:hover {
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s;
-    font-size: 0.9em;
+    font-size: clamp(0.8em, 2vw, 0.9em);
     display: flex;
     align-items: center;
     gap: 5px;
@@ -833,7 +807,7 @@ button:hover {
 }
 
 .btn-delete {
-    background-color: #e74c3c; /* Vermelho para exclusão */
+    background-color: #e74c3c;
 }
 
 .btn-delete:hover {
@@ -847,8 +821,8 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semi-transparente */
-    display: flex;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
@@ -868,16 +842,18 @@ button:hover {
 .modal-content h3 {
     color: var(--primary-color);
     margin-bottom: 15px;
+    font-size: clamp(1.2em, 3vw, 1.5em);
 }
 
 .modal-content p {
     margin-bottom: 20px;
-    font-size: 1.1em;
+    font-size: clamp(0.9em, 2.5vw, 1.1em);
 }
 
 .modal-actions {
     display: flex;
     justify-content: space-around;
+    gap: 10px;
 }
 
 .modal-actions button {
@@ -886,11 +862,12 @@ button:hover {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
+    width: 100%;
 }
 
 .confirm-cancel {
-    background-color: #e74c3c; /* Vermelho para confirmação de cancelamento */
+    background-color: #e74c3c;
     color: white;
 }
 
@@ -910,27 +887,34 @@ button:hover {
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
-        flex-direction: column;
-        align-items: flex-start;
+        padding: clamp(5px, 1vw, 10px);
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .logo {
+        flex-grow: 1;
+        text-align: left;
     }
 
     .menu {
         flex-direction: row;
-        width: auto;
-        margin-top: 10px;
+        gap: clamp(5px, 1vw, 10px);
+        justify-content: flex-end;
+        margin-top: 0;
     }
 
     .menu li {
-        margin: 0 5px;
+        margin-left: 0;
     }
 
     .menu a {
-        padding: 0.5rem;
-        width: auto;
+        padding: clamp(0.3rem, 1vw, 0.5rem);
     }
 
     .content {
         flex-direction: column;
+        padding: 10px;
     }
 
     .form-container,
@@ -939,6 +923,7 @@ button:hover {
     .avisos-list,
     .mensagens-list {
         min-width: 100%;
+        margin: 10px 0;
     }
 
     .comunicados {
@@ -946,15 +931,7 @@ button:hover {
     }
 
     .avisos, .mensagens {
-        padding: 15px;
-    }
-
-    .comunicados h2 {
-        font-size: 1.5rem;
-    }
-
-    .avisos h3, .mensagens h3 {
-        font-size: 1.2rem;
+        padding: 10px;
     }
 
     .status-form {
@@ -970,15 +947,49 @@ button:hover {
 
     .moradores-table {
         display: block;
-        overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+        overflow-x: auto;
     }
 
     .moradores-table th,
     .moradores-table td {
-        min-width: 120px; /* Garante largura mínima para legibilidade */
+        min-width: 100px;
     }
 
     .moradores-table .edit-form {
-        display: block; /* Em telas pequenas, o formulário volta a ser um bloco */
+        display: block;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .navbar {
+        padding: 5px;
+    }
+
+    .menu {
+        gap: 5px;
+        justify-content: space-around;
+    }
+
+    .menu a {
+        padding: clamp(0.2rem, 0.8vw, 0.3rem) clamp(0.3rem, 1vw, 0.5rem);
+    }
+
+    .login-form, .form-container {
+        padding: 15px;
+    }
+
+    .avisos li, .mensagens li {
+        padding: 8px;
+    }
+
+    .moradores-table th,
+    .moradores-table td {
+        padding: 8px;
+        font-size: 0.8em;
     }
 }
