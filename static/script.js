@@ -39,12 +39,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.querySelector('.hero h1.animate-text')) { // Identifica a página inicial
         // Configuração do Firebase para appcondominio-2fcac
         const firebaseConfig = {
-            apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s", // Obtenha no Firebase Console
+            apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
             authDomain: "appcondominio-2fcac.firebaseapp.com",
             projectId: "appcondominio-2fcac",
-            storageBucket: "appcondominio-2fcac.firebasestorage.app",
-            messagingSenderId: "454281232654", // Aproximado do client_id, verifique no Firebase Console
-            appId: "1:454281232654:web:647583086f3d4ed730175f" // Obtenha no Firebase Console
+            storageBucket: "appcondominio-2fcac.appspot.com", // Corrigido para usar o valor correto
+            messagingSenderId: "454281232654",
+            appId: "1:454281232654:web:647583086f3d4ed730175f",
+            measurementId: "G-SN7T6D7FTE" // Incluído, embora opcional para notificações
         };
 
         // Inicializar Firebase
