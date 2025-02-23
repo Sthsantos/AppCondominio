@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function registerPush() {
             messaging.requestPermission()
                 .then(() => {
-                    return messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }); // Substitua pela chave VAPID
+                    return messaging.getToken({ vapidKey: "BDESHlp_-xPi2dXf2Koo64EmoggthjFMUTwddYcciJf6WhcFqsYZmeqd1WWucf53-Q800QiVT4reOhT-5ek1k5E" }); // Substitua pela chave VAPID
                 })
                 .then((token) => {
                     console.log('Token FCM gerado:', token);
