@@ -25,8 +25,21 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['SESSION_TYPE'] = 'filesystem'  # Armazena sessões no sistema de arquivos
 Session(app)
 
-# Inicializar Firebase Admin SDK com caminho relativo
-cred = credentials.Certificate(os.path.join(os.path.dirname(__file__), 'firebase-adminsdk.json'))
+# Configuração do Firebase Admin SDK com credenciais embutidas
+firebase_cred = {
+    "type": "service_account",
+    "project_id": "appcondominio-2fcac",
+    "private_key_id": "8c469fdb3033d16c59a7ce731b467542d2d6caa1",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC980BYeZyhddRK\nGJjfbIxrMieAeqoZFptiYo0B9FWHjLdopcaXtwq1fAfCMprwrO2Nw7aLIanA0gt9\nI+wfNci7bkfI1X3yk2gkSKvZP36AWSPeCKFYiOxwoPxXWWacmo06sr9H9jKyrqjs\nIqBgZVkYPULAq+AW+cH2tHGhDtf9dM+kviqFXXSw3UY5p2/jpLDPDrH/tIUnFoMp\nfVFg9alZ0sHNW4Q/585ePg1ebdFHHfjIwEGWnDVQyUfezxUlJybb+aYlKqE1vEEE\nYRDQjA33ZrODwUstf8SCPycBxrvwyaYYL4gZXkYkj2pyG4cx1G+YEI1ryZvaUZ+8\n9jG7P4ILAgMBAAECggEAQL9/wgjmQsVa8Uz0I0ipjsrAW1O00qt5mO5V+YITe4qU\nZFgJ22JaBKX8MQ618O9JZIb/nOqDJkaTAvuxO6xGOdmsH4HilkL3/1JEPeAeW1rH\nVqKjeP3ndrbxfUbsqtol5QnUGRALlQvjaeadu24gkhojvHB6COrm2pUEnK1mI69M\n0RWQjn+NrKGCthzaUx4rJz7R9y3VGa5gLg6Mz4h+n89RTp/P/E91Bokyn/Dd4xns\ny9Rc4PGAhxNOumXd/OuiqqAfVTJczF3+Dss8tHtMrmxQj03v+E3aKGqAQxe7J0vm\nkZbGhExIdFSy+kqRQcTqdr9RA+IDESvvE3oohxeZoQKBgQDg2oWtspteM44C1NwH\nOjRIs1LH3XCipbg9iMC31lqcBSPOUiCwVo1lvOascS2/O0LbCFKupzu5FDa2SGpg\nqfi8s6jTIj/TrOMG+3wqX84e43UxHNVQU11kQdvpEF/PqCK1+ZBIjDff6R1mhVkP\nZivgX9QP6EPE9iJF77WOKVBHawKBgQDYQwc+kZYq0QrPxX648R/MGujFPWu7aTkq\n6qAFcAcM8AvqRjjvif5PdxfePCwO894YzFmOudVpsbgp9l8bu+FfDlJ8guIplhYx\nNSc18DY9ZTy/QDBK7a+vDMK84/dAuow0VpkPE6WgNGJxrDx9B1fnl/i+i1UIrNXg\nstRzFPp34QKBgQCcUg+BlJxDP2BJQ6a8N5DFwjWY0bBOwxt1XC9vH0zbDw+3jo0/\nSsz+n/dWh1CglBiEoiKpXYY9w3nN/EZIcaKFvflu3260QIuM/SVzaCuqecOtozgB\nohNZchfqzgFuIpwPGzNd3G2z8yMHdUlXVVbHpJePf5AtzFhDesUj0kEHhQKBgQCR\nQlR3XmqzT74nWMyJhMyK1/hJo7vdIgxYG0ho3pqdwg7+yTQtEU9UKPZLO7eMQ5mG\nppvxFjmWyNyesvGnO0diBci6AV/P9xPo8X7o5/RGwN1QyNinO4ep2LRlE+pb+/F4\npkIgsl2pggYtvDbU9D3DPXzC3+u56/2s8/Fna0vhgQKBgQC6V5wdAInAxxRCS9Fk\nH5FSeToReDVschP05vuqEUIgjrkZ75j4/C2utAi/y7myXGplY82VD9J672srgI6c\nZCWBxlrZytSe2jjC7W7GTywL7OZqFZ4nAYzAmbCuSxpRKD4WmhCKVOTfVc9gDN/h\nTrls7GHyzgdm0SIoj6fyy2mj6A==\n-----END PRIVATE KEY-----\n",
+    "client_email": "firebase-adminsdk-fbsvc@appcondominio-2fcac.iam.gserviceaccount.com",
+    "client_id": "117990932930345036538",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40appcondominio-2fcac.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+}
+cred = credentials.Certificate(firebase_cred)
 firebase_admin.initialize_app(cred)
 
 # Filtro personalizado para formatar datas
@@ -256,19 +269,21 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Função para enviar notificação push
+# Função para enviar notificação push com logs de depuração
 def send_push_notification(token, title, body):
     if not token:
+        print("Nenhum token FCM fornecido")
         return False
     message = messaging.Message(
         notification=messaging.Notification(title=title, body=body),
         token=token,
     )
     try:
-        messaging.send(message)
+        response = messaging.send(message)
+        print(f"Notificação enviada com sucesso para {token}: {response}")
         return True
     except Exception as e:
-        print(f"Erro ao enviar notificação: {e}")
+        print(f"Erro ao enviar notificação para {token}: {e}")
         return False
 
 @app.route('/')
@@ -982,6 +997,7 @@ def register_token():
     if 'user_id' not in session:
         return 'Unauthorized', 401
     token = request.json.get('token')
+    print(f"Token FCM recebido do frontend: {token}")  # Log para depuração
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('UPDATE usuarios SET fcm_token = ? WHERE id = ?', (token, session['user_id']))
@@ -998,14 +1014,17 @@ def send_notification():
     conn.close()
     token = user['fcm_token']
     if not token:
+        print("Nenhum token FCM encontrado para o usuário")
         return 'Token não encontrado', 400
     
     title = request.form.get('title', 'Nova Notificação')
     body = request.form.get('body', 'Você tem uma nova mensagem no sistema!')
+    print(f"Enviando notificação - Título: {title}, Corpo: {body}, Token: {token}")  # Log para depuração
     success = send_push_notification(token, title, body)
     if success:
         return f'Notificação enviada', 200
     return 'Erro ao enviar notificação', 500
 
 if __name__ == '__main__':
+    print("Iniciando o aplicativo Flask...")
     app.run(debug=True)
