@@ -1,11 +1,22 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 import sqlite3
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+import os
 from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Use uma chave secreta forte em produção
+
+# Configuração para upload de arquivos
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Certifique-se de que o diretório de uploads existe
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Filtro personalizado para formatar datas
 def datetime_to_local(value):
@@ -16,6 +27,9 @@ def datetime_to_local(value):
 
 app.jinja_env.filters['datetime_to_local'] = datetime_to_local
 app.jinja_env.filters['strftime'] = lambda value, fmt: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(fmt) if value else value
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db_connection():
     conn = sqlite3.connect('condominio.db')
@@ -163,8 +177,10 @@ def get_db_connection():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER,
         tipo TEXT NOT NULL,
+        titulo TEXT NOT NULL,
         descricao TEXT NOT NULL,
         data_criacao TIMESTAMP,
+        imagem TEXT,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
@@ -172,7 +188,7 @@ def get_db_connection():
     CREATE TABLE IF NOT EXISTS forum_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER,
-        categoria TEXT NOT NULL,  -- Ex.: Eventos, Sugestões, Manutenção
+        categoria TEXT NOT NULL,
         titulo TEXT NOT NULL,
         mensagem TEXT NOT NULL,
         data_postagem TIMESTAMP,
@@ -194,7 +210,7 @@ def get_db_connection():
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
-    conn.commit()  # Salva as alterações no esquema
+    conn.commit()
     return conn
 
 def admin_required(f):
@@ -807,21 +823,38 @@ def anuncios():
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
     if request.method == 'POST':
-        if 'tipo' in request.form and 'descricao' in request.form:  # Criar novo anúncio
+        if 'tipo' in request.form and 'titulo' in request.form and 'descricao' in request.form:  # Criar novo anúncio
             tipo = request.form['tipo']
+            titulo = request.form['titulo']
             descricao = request.form['descricao']
             data_criacao = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            imagem = None
+
+            # Verifica se há um arquivo na requisição
+            if 'imagem' in request.files:
+                file = request.files['imagem']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    imagem = filename
+
             cur = conn.cursor()
-            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, descricao, data_criacao)
-                            VALUES (?, ?, ?, ?)''', (session['user_id'], tipo, descricao, data_criacao))
+            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, titulo, descricao, data_criacao, imagem)
+                            VALUES (?, ?, ?, ?, ?, ?)''', (session['user_id'], tipo, titulo, descricao, data_criacao, imagem))
             conn.commit()
             flash('Anúncio criado com sucesso!', 'success')
         elif 'delete_anuncio_id' in request.form:  # Excluir anúncio
             anuncio_id = request.form['delete_anuncio_id']
-            anuncio = conn.execute('SELECT usuario_id FROM anuncios WHERE id = ?', (anuncio_id,)).fetchone()
+            anuncio = conn.execute('SELECT usuario_id, imagem FROM anuncios WHERE id = ?', (anuncio_id,)).fetchone()
             if anuncio['usuario_id'] != session['user_id']:
                 flash('Você não tem permissão para excluir este anúncio!', 'error')
             else:
+                # Remove a imagem do servidor, se existir
+                if anuncio['imagem']:
+                    try:
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], anuncio['imagem']))
+                    except OSError:
+                        pass  # Ignora se o arquivo não existir
                 cur = conn.cursor()
                 cur.execute('DELETE FROM anuncios WHERE id = ? AND usuario_id = ?', (anuncio_id, session['user_id'],))
                 conn.commit()
@@ -830,6 +863,10 @@ def anuncios():
     anuncios = conn.execute('SELECT a.*, u.nome AS usuario_nome FROM anuncios a JOIN usuarios u ON a.usuario_id = u.id ORDER BY data_criacao DESC').fetchall()
     conn.close()
     return render_template('anuncios.html', anuncios=anuncios, usuario=usuario)
+
+@app.route('/static/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/forum', methods=['GET', 'POST'])
 def forum():
@@ -866,12 +903,11 @@ def forum():
                 flash('Você não tem permissão para excluir esta postagem!', 'error')
             else:
                 cur = conn.cursor()
-                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))  # Exclui respostas primeiro
+                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))
                 cur.execute('DELETE FROM forum_posts WHERE id = ? AND usuario_id = ?', (post_id, session['user_id'],))
                 conn.commit()
                 flash('Postagem excluída com sucesso!', 'success')
 
-    # Busca postagens e respostas
     categoria_filtro = request.args.get('categoria', '')
     if categoria_filtro:
         posts = conn.execute('SELECT p.*, u.nome AS usuario_nome FROM forum_posts p JOIN usuarios u ON p.usuario_id = u.id WHERE p.categoria = ? ORDER BY data_postagem DESC', (categoria_filtro,)).fetchall()
