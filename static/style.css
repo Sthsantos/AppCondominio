@@ -36,7 +36,7 @@ header {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
-    z-index: 900; /* Menor que o sidebar para não sobrepor */
+    z-index: 900; /* Menor que o sidebar-toggle */
 }
 
 .navbar {
@@ -46,13 +46,14 @@ header {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 clamp(1rem, 3vw, 2rem);
-    flex-wrap: nowrap;
+    position: relative; /* Para posicionar o sidebar-toggle */
 }
 
 .logo {
     font-weight: bold;
     font-size: clamp(1.2em, 4vw, 1.5em);
     color: var(--link-color);
+    margin-left: 40px; /* Espaço para o botão sidebar-toggle */
 }
 
 .menu {
@@ -1026,14 +1027,14 @@ button:hover {
 /* Estilos para o menu lateral */
 .sidebar {
     position: fixed;
-    top: 0; /* Começa no topo da página */
-    left: -250px; /* Escondido por padrão */
+    top: 0;
+    left: -250px;
     width: 250px;
     height: 100%;
     background-color: var(--input-bg);
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     transition: left 0.3s ease;
-    z-index: 1000; /* Maior que o header */
+    z-index: 950; /* Entre o header e o sidebar-toggle */
 }
 
 .sidebar.open {
@@ -1043,7 +1044,7 @@ button:hover {
 .sidebar ul {
     list-style: none;
     padding: 20px;
-    margin-top: 50px; /* Espaço para o botão de toggle */
+    margin-top: 0; /* Sem espaço extra no topo */
 }
 
 .sidebar li {
@@ -1079,8 +1080,8 @@ button:hover {
     padding: 10px;
     position: absolute;
     top: 10px;
-    left: 10px; /* Alinhado à esquerda dentro do sidebar */
-    z-index: 1001; /* Acima do sidebar */
+    left: 10px;
+    z-index: 1001; /* Acima do header e do sidebar */
 }
 
 /* Media Queries para Responsividade */
@@ -1094,6 +1095,7 @@ button:hover {
     .logo {
         flex-grow: 1;
         text-align: left;
+        margin-left: 40px; /* Mantém o espaço para o botão */
     }
 
     .menu {
