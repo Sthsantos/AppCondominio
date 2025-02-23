@@ -1,13 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask_session import Session
 import sqlite3
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
 from functools import wraps
+import firebase_admin
+from firebase_admin import credentials, messaging
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Use uma chave secreta forte em produção
+app.secret_key = 'your_secret_key_here'  # Use umaMagnus chave secreta forte em produção
 
 # Configuração para upload de arquivos
 UPLOAD_FOLDER = 'static/uploads'
@@ -17,6 +20,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Certifique-se de que o diretório de uploads existe
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+# Configuração para sessões persistentes
+app.config['SESSION_TYPE'] = 'filesystem'  # Armazena sessões no sistema de arquivos
+Session(app)
+
+# Inicializar Firebase Admin SDK
+cred = credentials.Certificate('C:/Users/sthen/OneDrive/Área de Trabalho/APLCATIVOS APP/AppCondominio/firebase-adminsdk.json')  # Caminho corrigido
+firebase_admin.initialize_app(cred)
 
 # Filtro personalizado para formatar datas
 def datetime_to_local(value):
@@ -36,6 +47,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
+    # Criação das tabelas (mantidas como no original)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +58,8 @@ def get_db_connection():
         rua TEXT,
         numero TEXT,
         garagem TEXT,
-        tipo_ocupacao TEXT
+        tipo_ocupacao TEXT,
+        fcm_token TEXT  -- Adicionado para armazenar o token FCM
     )
     ''')
     cursor.execute('''
@@ -182,7 +195,6 @@ def get_db_connection():
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
-    # Adicionar colunas 'titulo' e 'imagem' se não existirem
     try:
         cursor.execute('ALTER TABLE anuncios ADD COLUMN titulo TEXT NOT NULL DEFAULT ""')
     except sqlite3.OperationalError:
@@ -217,6 +229,13 @@ def get_db_connection():
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
+
+    # Adicionar coluna fcm_token à tabela usuarios se não existir
+    try:
+        cursor.execute('ALTER TABLE usuarios ADD COLUMN fcm_token TEXT')
+    except sqlite3.OperationalError:
+        pass  # Coluna já existe
+
     conn.commit()
     return conn
 
@@ -236,6 +255,21 @@ def admin_required(f):
 
         return f(*args, **kwargs)
     return decorated_function
+
+# Função para enviar notificação push
+def send_push_notification(token, title, body):
+    if not token:
+        return False
+    message = messaging.Message(
+        notification=messaging.Notification(title=title, body=body),
+        token=token,
+    )
+    try:
+        messaging.send(message)
+        return True
+    except Exception as e:
+        print(f"Erro ao enviar notificação: {e}")
+        return False
 
 @app.route('/')
 def index():
@@ -279,6 +313,8 @@ def login():
         if user and check_password_hash(user['senha_hash'], password):
             session['user_id'] = user['id']
             session['tipo_usuario'] = user['tipo_usuario']
+            session.permanent = True  # Sessão persiste mesmo após fechar o app
+            conn.close()
             return redirect(url_for('index'))
         conn.close()
         flash('Email ou senha incorretos!', 'error')
@@ -527,6 +563,9 @@ def comunicacao():
                 cur.execute('''INSERT INTO avisos (titulo, mensagem, data_envio)
                                 VALUES (?, ?, ?)''', (titulo, mensagem, data_envio))
                 conn.commit()
+                # Enviar notificação para todos os usuários
+                for user in conn.execute('SELECT fcm_token FROM usuarios WHERE fcm_token IS NOT NULL').fetchall():
+                    send_push_notification(user['fcm_token'], 'Novo Aviso', mensagem)
                 flash('Aviso geral enviado com sucesso!', 'success')
             elif tipo_comunicacao == 'especifico':
                 destinatario_id = request.form['destinatario_id']
@@ -538,6 +577,10 @@ def comunicacao():
                     cur.execute('''INSERT INTO correspondencias (usuario_id, tipo, descricao, data_recebimento, status)
                                     VALUES (?, ?, ?, ?, ?)''', (destinatario_id, tipo_correspondencia, mensagem, data_envio, 'Recebida'))
                 conn.commit()
+                # Enviar notificação ao destinatário
+                token = conn.execute('SELECT fcm_token FROM usuarios WHERE id = ?', (destinatario_id,)).fetchone()['fcm_token']
+                if token:
+                    send_push_notification(token, 'Nova Mensagem', mensagem)
                 flash('Mensagem enviada com sucesso!' + (' Correspondência registrada!' if is_correspondencia else ''), 'success')
         elif 'delete_mensagem_id' in request.form:
             mensagem_id = request.form['delete_mensagem_id']
@@ -933,6 +976,36 @@ def forum():
 @admin_required
 def admin():
     return render_template('admin.html')
+
+@app.route('/register_token', methods=['POST'])
+def register_token():
+    if 'user_id' not in session:
+        return 'Unauthorized', 401
+    token = request.json.get('token')
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('UPDATE usuarios SET fcm_token = ? WHERE id = ?', (token, session['user_id']))
+    conn.commit()
+    conn.close()
+    return 'Token registrado', 200
+
+@app.route('/send_notification', methods=['POST'])
+def send_notification():
+    if 'user_id' not in session:
+        return 'Unauthorized', 401
+    conn = get_db_connection()
+    user = conn.execute('SELECT fcm_token FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
+    conn.close()
+    token = user['fcm_token']
+    if not token:
+        return 'Token não encontrado', 400
+    
+    title = request.form.get('title', 'Nova Notificação')
+    body = request.form.get('body', 'Você tem uma nova mensagem no sistema!')
+    success = send_push_notification(token, title, body)
+    if success:
+        return f'Notificação enviada', 200
+    return 'Erro ao enviar notificação', 500
 
 if __name__ == '__main__':
     app.run(debug=True)
