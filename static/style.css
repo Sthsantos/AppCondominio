@@ -245,7 +245,8 @@ header {
 .form-container input[type="text"],
 .form-container input[type="email"],
 .form-container input[type="password"],
-.form-container input[type="number"] {
+.form-container input[type="number"],
+.form-container input[type="file"] { /* Adicionado para upload de arquivos */
     width: 100%;
     padding: 10px;
     background-color: var(--input-bg);
@@ -266,7 +267,9 @@ header {
 .login-form input[type="email"]:focus,
 .login-form input[type="password"]:focus,
 .form-container input[type="email"]:focus,
-.form-container input[type="password"]:focus {
+.form-container input[type="password"]:focus,
+.form-container input[type="text"]:focus,
+.form-container input[type="file"]:focus { /* Adicionado para consistência */
     border-color: var(--primary-color);
     background-color: var(--input-focus);
     outline: none;
@@ -376,7 +379,8 @@ header {
 .correspondencias-page .hero,
 .estacionamento-page .hero,
 .emergencias-page .hero,
-.cadastro-moradores-page .hero {
+.cadastro-moradores-page .hero,
+.anuncios-page .hero { /* Adicionado para anuncios.html */
     padding: clamp(20px, 5vw, 30px) 1rem;
     background: linear-gradient(135deg, var(--header-color), var(--background-color));
     text-align: center;
@@ -388,7 +392,8 @@ header {
 .correspondencias-page .hero h1,
 .estacionamento-page .hero h1,
 .emergencias-page .hero h1,
-.cadastro-moradores-page .hero h1 {
+.cadastro-moradores-page .hero h1,
+.anuncios-page .hero h1 { /* Adicionado para anuncios.html */
     color: var(--primary-color);
     font-size: clamp(1.5em, 5vw, 2.5em);
     animation: pulse 2s infinite;
@@ -406,7 +411,8 @@ header {
 
 .content-container,
 .form-container,
-.reservas-list {
+.reservas-list,
+.anuncios-list-container { /* Adicionado para anuncios.html */
     flex: 1;
     min-width: 300px;
     margin: 10px;
@@ -423,7 +429,8 @@ header {
 }
 
 .form-container h2,
-.reservas-list h2 {
+.reservas-list h2,
+.anuncios-list-container h2 { /* Adicionado para anuncios.html */
     color: var(--primary-color);
     margin-top: 0;
     font-size: clamp(1.2em, 3vw, 1.5em);
@@ -482,7 +489,8 @@ button:hover {
 .feedbacks-list,
 .correspondencias-list,
 .veiculos-list,
-.emergencias-list {
+.emergencias-list,
+.anuncios-list { /* Adicionado para anuncios.html */
     list-style-type: none;
     padding: 0;
 }
@@ -492,7 +500,8 @@ button:hover {
 .feedbacks-list li,
 .correspondencias-list li,
 .veiculos-list li,
-.emergencias-list li {
+.emergencias-list li,
+.anuncios-list li { /* Adicionado para anuncios.html */
     background-color: var(--input-bg);
     margin: 10px 0;
     padding: 10px;
@@ -505,7 +514,8 @@ button:hover {
 .servicos-list li:hover,
 .feedbacks-list li:hover,
 .correspondencias-list li:hover,
-.veiculos-list li:hover {
+.veiculos-list li:hover,
+.anuncios-list li:hover { /* Adicionado para anuncios.html */
     background-color: var(--input-focus);
 }
 
@@ -730,7 +740,7 @@ button:hover {
 .edit-form {
     margin-top: 10px;
     padding: 10px;
-    background-color: #3a3a3a; /* Ajustado para combinar com o tema escuro */
+    background-color: #3a3a3a;
     border: 1px solid var(--border-color);
     border-radius: 4px;
 }
@@ -786,7 +796,7 @@ button:hover {
 }
 
 .btn-edit, .btn-delete {
-    background-color: #5bc0de; /* Azul claro para "editar" */
+    background-color: #5bc0de;
     border: none;
     color: white;
     padding: clamp(3px, 1vw, 5px) clamp(5px, 1.5vw, 10px);
@@ -804,7 +814,7 @@ button:hover {
 }
 
 .btn-delete {
-    background-color: #d9534f; /* Vermelho para "excluir" */
+    background-color: #d9534f;
 }
 
 .btn-delete:hover {
@@ -826,7 +836,7 @@ button:hover {
 }
 
 .modal-content {
-    background-color: #333; /* Ajustado para tema escuro */
+    background-color: #333;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -881,6 +891,51 @@ button:hover {
     background-color: #31b0d5;
 }
 
+/* Estilos para a página de anúncios */
+.anuncios-categoria {
+    margin-bottom: 20px;
+}
+
+.anuncios-categoria h3 {
+    color: var(--primary-color);
+    font-size: clamp(1.1em, 3vw, 1.3em);
+    margin-bottom: 10px;
+}
+
+.anuncios-list {
+    list-style: none;
+    padding: 0;
+}
+
+.anuncios-list li {
+    background-color: var(--input-bg);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: clamp(0.8em, 2vw, 0.9em);
+}
+
+.anuncios-list li:hover {
+    background-color: var(--input-focus);
+}
+
+.anuncio-imagem {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 4px;
+    max-height: 200px;
+}
+
+/* Mensagem de dados ausentes */
+.no-data {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-color);
+    font-size: clamp(0.9em, 2.5vw, 1.1em);
+}
+
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
@@ -918,7 +973,8 @@ button:hover {
     .reservas-list,
     .content-container,
     .avisos-list,
-    .mensagens-list {
+    .mensagens-list,
+    .anuncios-list-container {
         min-width: 100%;
         margin: 10px 0;
     }
@@ -944,13 +1000,13 @@ button:hover {
 
     .moradores-table {
         display: block;
-        overflow-x: auto; /* Rolagem horizontal */
+        overflow-x: auto;
         width: 100%;
     }
 
     .moradores-table th,
     .moradores-table td {
-        min-width: 100px; /* Largura mínima para legibilidade */
+        min-width: 100px;
         padding: clamp(5px, 1vw, 8px);
     }
 
@@ -966,6 +1022,14 @@ button:hover {
     .modal-actions {
         flex-direction: column;
         gap: 10px;
+    }
+
+    .anuncios-list li {
+        padding: 10px;
+    }
+
+    .anuncio-imagem {
+        max-height: 150px;
     }
 }
 
@@ -1004,5 +1068,18 @@ button:hover {
 
     .edit-form {
         padding: 5px;
+    }
+
+    .anuncios-categoria h3 {
+        font-size: clamp(1em, 2.5vw, 1.2em);
+    }
+
+    .anuncios-list li {
+        padding: 8px;
+        font-size: clamp(0.7em, 1.8vw, 0.8em);
+    }
+
+    .anuncio-imagem {
+        max-height: 100px;
     }
 }
