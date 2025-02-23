@@ -9,14 +9,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
     <script>
-        // Configuração do Firebase (substitua pelos valores do seu projeto no Firebase Console)
+        // Configuração do Firebase para appcondominio-2fcac
         const firebaseConfig = {
-            apiKey: "sua_api_key",
-            authDomain: "seu_projeto.firebaseapp.com",
-            projectId: "seu_projeto",
-            storageBucket: "seu_projeto.appspot.com",
-            messagingSenderId: "seu_sender_id",
-            appId: "seu_app_id"
+            apiKey: "AIzaSyAJ4KtuG5s8rGYiY4vWm6xW2mCozbN8mZg", // Substitua pelo valor real do Firebase Console
+            authDomain: "appcondominio-2fcac.firebaseapp.com",
+            projectId: "appcondominio-2fcac",
+            storageBucket: "appcondominio-2fcac.appspot.com",
+            messagingSenderId: "117990932930345036538", // Usando client_id como sender ID (verifique no Firebase Console)
+            appId: "1:117990932930345036538:web:SEU_APP_ID_AQUI" // Substitua pelo App ID real do Firebase Console
         };
 
         // Inicializar Firebase
@@ -25,22 +25,28 @@
 
         // Função para registrar o token FCM
         function registerPush() {
-            messaging.requestPermission().then(() => {
-                return messaging.getToken();
-            }).then((token) => {
-                fetch('/register_token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: token })
-                }).then(response => console.log('Token registrado:', response));
-            }).catch((err) => {
-                console.error('Erro ao registrar push:', err);
-            });
+            messaging.requestPermission()
+                .then(() => {
+                    return messaging.getToken({ vapidKey: "SEU_VAPID_KEY_AQUI" }); // Substitua pela chave VAPID
+                })
+                .then((token) => {
+                    console.log('Token FCM:', token);
+                    fetch('/register_token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    }).then(response => response.text())
+                      .then(text => console.log('Token registrado:', text))
+                      .catch(err => console.error('Erro ao enviar token:', err));
+                })
+                .catch((err) => {
+                    console.error('Erro ao registrar push:', err);
+                });
         }
 
         // Receber notificações em foreground
         messaging.onMessage((payload) => {
-            console.log('Notificação recebida:', payload);
+            console.log('Notificação recebida em foreground:', payload);
             alert(payload.notification.body); // Exemplo simples de exibição
         });
 
