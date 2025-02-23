@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="pagamentos-page">
+        <section class="hero">
+            <h1 class="animate-text">Gerenciar Pagamentos</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Registrar Pagamento</h2>
+                <form method="POST">
+                    <label for="usuario_id">ID do Usuário:</label>
+                    <input type="text" id="usuario_id" name="usuario_id" required>
+
+                    <label for="valor">Valor:</label>
+                    <input type="text" id="valor" name="valor" required>
+
+                    <label for="data_pagamento">Data do Pagamento (YYYY-MM-DD):</label>
+                    <input type="date" id="data_pagamento" name="data_pagamento" required>
+
+                    <input type="submit" value="Registrar Pagamento">
+                </form>
+            </div>
+            <div class="pagamentos-list">
+                <h2>Histórico de Pagamentos</h2>
+                <ul>
+                {% for pagamento in pagamentos %}
+                    <li>Usuário: {{ pagamento['usuario_id'] }} - Valor: {{ pagamento['valor'] }} - Data: {{ pagamento['data_pagamento'] }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

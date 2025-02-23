@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas - Administração de Condomínios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+    <script>
+        function toggleEditForm(reservaId) {
+            const form = document.getElementById('edit-form-' + reservaId);
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        function showCancelModal(reservaId) {
+            const modal = document.getElementById('cancel-modal');
+            const form = document.getElementById('cancel-form-' + reservaId);
+            modal.style.display = 'block';
+            modal.querySelector('.confirm-cancel').onclick = function() {
+                form.submit();
+            };
+        }
+        function hideCancelModal() {
+            const modal = document.getElementById('cancel-modal');
+            modal.style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                    {% if tipo_usuario == 'admin' %}
+                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="reservas-page">
+        <section class="hero">
+            <h1 class="animate-text">Gerenciar Reservas</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Nova Reserva</h2>
+                <form method="POST" action="{{ url_for('reservas') }}">
+                    <div class="form-group">
+                        <label for="area_comum">Área Comum:</label>
+                        <select name="area_comum" id="area_comum" required>
+                            <option value="Salão de Festas">Salão de Festas</option>
+                            <option value="Churrasqueira">Churrasqueira</option>
+                            <option value="Piscina">Piscina</option>
+                            <option value="Quadra Esportiva">Quadra Esportiva</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_inicio">Data e Hora de Início:</label>
+                        <input type="datetime-local" name="data_inicio" id="data_inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_fim">Data e Hora de Fim:</label>
+                        <input type="datetime-local" name="data_fim" id="data_fim" required>
+                    </div>
+                    <input type="submit" value="Reservar">
+                </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul class="flash-messages">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="reservas-list">
+                <h2>Todas as Reservas</h2>
+                {% if todas_reservas|length > 0 %}
+                    <ul>
+                        {% for reserva in todas_reservas %}
+                            <li>
+                                <strong>Usuário:</strong> {{ reserva['usuario_nome'] }}<br>
+                                <strong>Área Comum:</strong> {{ reserva['area_comum'] }}<br>
+                                <strong>Data de Início:</strong> {{ reserva['data_inicio']|strftime('%d/%m/%Y %H:%M') }}<br>
+                                <strong>Data de Fim:</strong> {{ reserva['data_fim']|strftime('%d/%m/%Y %H:%M') }}<br>
+                                {% if reserva['usuario_id'] == session['user_id'] or tipo_usuario == 'admin' %}
+                                    <div class="reserva-actions">
+                                        <button onclick="toggleEditForm({{ reserva['id'] }})" class="btn-edit">
+                                            <i class="fas fa-edit"></i> Modificar
+                                        </button>
+                                        <button onclick="showCancelModal({{ reserva['id'] }})" class="btn-delete">
+                                            <i class="fas fa-trash"></i> Cancelar
+                                        </button>
+                                        <form id="cancel-form-{{ reserva['id'] }}" method="POST" action="{{ url_for('cancelar_reserva', reserva_id=reserva['id']) }}" style="display: none;"></form>
+                                    </div>
+                                    <div id="edit-form-{{ reserva['id'] }}" class="edit-form" style="display: none;">
+                                        <form method="POST" action="{{ url_for('editar_reserva', reserva_id=reserva['id']) }}">
+                                            <div class="form-group">
+                                                <label for="edit_area_comum_{{ reserva['id'] }}">Área Comum:</label>
+                                                <select name="area_comum" id="edit_area_comum_{{ reserva['id'] }}" required>
+                                                    <option value="Salão de Festas" {% if reserva['area_comum'] == 'Salão de Festas' %}selected{% endif %}>Salão de Festas</option>
+                                                    <option value="Churrasqueira" {% if reserva['area_comum'] == 'Churrasqueira' %}selected{% endif %}>Churrasqueira</option>
+                                                    <option value="Piscina" {% if reserva['area_comum'] == 'Piscina' %}selected{% endif %}>Piscina</option>
+                                                    <option value="Quadra Esportiva" {% if reserva['area_comum'] == 'Quadra Esportiva' %}selected{% endif %}>Quadra Esportiva</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_data_inicio_{{ reserva['id'] }}">Data de Início:</label>
+                                                <input type="datetime-local" name="data_inicio" id="edit_data_inicio_{{ reserva['id'] }}" value="{{ reserva['data_inicio']|datetime_to_local }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_data_fim_{{ reserva['id'] }}">Data de Fim:</label>
+                                                <input type="datetime-local" name="data_fim" id="edit_data_fim_{{ reserva['id'] }}" value="{{ reserva['data_fim']|datetime_to_local }}" required>
+                                            </div>
+                                            <input type="submit" value="Salvar Alterações">
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-data">Nenhuma reserva registrada no momento.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Modal de Confirmação -->
+        <div id="cancel-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Confirmar Cancelamento</h3>
+                <p>Tem certeza que deseja cancelar esta reserva?</p>
+                <div class="modal-actions">
+                    <button class="confirm-cancel">Sim, Cancelar</button>
+                    <button onclick="hideCancelModal()" class="cancel-modal">Não</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

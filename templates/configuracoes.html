@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="configuracoes-page">
+        <section class="hero">
+            <h1 class="animate-text">Configurações</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Configurações do Sistema</h2>
+                <form method="POST">
+                    <label for="tema">Tema:</label>
+                    <select id="tema" name="tema" required>
+                        <option value="escuro">Escuro</option>
+                        <option value="claro">Claro</option>
+                    </select>
+
+                    <label for="notificacoes">Receber Notificações:</label>
+                    <input type="checkbox" id="notificacoes" name="notificacoes">
+
+                    <input type="submit" value="Salvar Configurações">
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,984 @@
+/* Variáveis CSS para facilitar a manutenção */
+:root {
+    --primary-color: #4CAF50;
+    --background-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --header-color: #2c3e50;
+    --link-color: #ecf0f1;
+    --hover-color: #34495e;
+    --input-bg: #444;
+    --input-focus: #555;
+    --border-color: #666;
+}
+
+/* Resets e Configurações Gerais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', 'Arial', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Header (Comum para todas as páginas) */
+header {
+    background-color: var(--header-color);
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 1.5em;
+    color: var(--link-color);
+}
+
+.menu {
+    list-style: none;
+    display: flex;
+}
+
+.menu li {
+    margin-left: 15px;
+}
+
+.menu a {
+    color: var(--link-color);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu a i {
+    font-size: 1.5em;
+}
+
+.menu a:hover {
+    background-color: var(--hover-color);
+    color: var(--primary-color);
+}
+
+/* Estilos para index.html */
+.hero {
+    text-align: center;
+    padding: 50px 0;
+    background: linear-gradient(135deg, var(--header-color), var(--background-color));
+}
+
+.animate-text {
+    font-size: 2.5em;
+    color: var(--primary-color);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Nova seção de comunicados */
+.comunicados {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.comunicados h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.avisos, .mensagens {
+    margin-bottom: 30px;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.avisos h3, .mensagens h3 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.avisos ul, .mensagens ul {
+    list-style: none;
+    padding: 0;
+}
+
+.avisos li, .mensagens li {
+    background-color: var(--input-bg);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.avisos li:hover, .mensagens li:hover {
+    background-color: var(--input-focus);
+}
+
+.avisos li strong, .mensagens li strong {
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.avisos p, .mensagens p {
+    margin: 5px 0 0;
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.feature-link:hover .feature {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+.feature {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.feature-icon {
+    font-size: 2em;
+    color: var(--primary-color);
+}
+
+.feature h3 {
+    font-size: 1.2em;
+    color: var(--primary-color);
+    margin: 10px 0;
+}
+
+.feature p {
+    font-size: 0.9em;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* Estilos para login.html, cadastro.html e cadastro_moradores.html */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px);
+    background: url('/static/login-background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-color: var(--background-color);
+}
+
+.login-form, .form-container {
+    background-color: rgba(51, 51, 51, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.login-form h1, .form-container h2 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="email"],
+.login-form input[type="password"],
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"],
+.form-container input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1em;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.login-form input[type="email"]:focus,
+.login-form input[type="password"]:focus,
+.form-container input[type="email"]:focus,
+.form-container input[type="password"]:focus {
+    border-color: var(--primary-color);
+    background-color: var(--input-focus);
+    outline: none;
+}
+
+.login-form input[type="email"]::placeholder,
+.login-form input[type="password"]::placeholder,
+.form-container input[type="email"]::placeholder,
+.form-container input[type="password"]::placeholder {
+    color: #aaa;
+    opacity: 0.8;
+}
+
+.btn-login, .form-container input[type="submit"] {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.btn-login:hover, .form-container input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.flash-messages {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* Estilos para a página de comunicação */
+.comunicacao-page .content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.comunicacao-page .form-container,
+.comunicacao-page .avisos-list,
+.comunicacao-page .mensagens-list {
+    flex: 1;
+    min-width: 300px;
+    margin: 10px;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.comunicacao-page .form-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.comunicacao-page .form-container select,
+.comunicacao-page .form-container input[type="text"],
+.comunicacao-page .form-container textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1em;
+    margin-bottom: 10px;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.comunicacao-page .form-container select:focus,
+.comunicacao-page .form-container input[type="text"]:focus,
+.comunicacao-page .form-container textarea:focus {
+    border-color: var(--primary-color);
+    background-color: var(--input-focus);
+    outline: none;
+}
+
+.comunicacao-page .form-container textarea {
+    height: 100px;
+}
+
+.comunicacao-page .avisos-list h2,
+.comunicacao-page .mensagens-list h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.5em;
+}
+
+.comunicacao-page .avisos-list ul,
+.comunicacao-page .mensagens-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.comunicacao-page .avisos-list li,
+.comunicacao-page .mensagens-list li {
+    background-color: var(--input-bg);
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.comunicacao-page .avisos-list li:hover,
+.comunicacao-page .mensagens-list li:hover {
+    background-color: var(--input-focus);
+}
+
+.comunicacao-page .avisos-list li strong,
+.comunicacao-page .mensagens-list li strong {
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+/* Estilos para a página de reservas e outras */
+.reservas-page .hero,
+.manutencao-page .hero,
+.feedback-page .hero,
+.correspondencias-page .hero,
+.estacionamento-page .hero,
+.emergencias-page .hero,
+.cadastro-moradores-page .hero {
+    padding: 30px 0;
+    background: linear-gradient(135deg, var(--header-color), var(--background-color));
+    text-align: center;
+}
+
+.reservas-page .hero h1,
+.manutencao-page .hero h1,
+.feedback-page .hero h1,
+.correspondencias-page .hero h1,
+.estacionamento-page .hero h1,
+.emergencias-page .hero h1,
+.cadastro-moradores-page .hero h1 {
+    color: var(--primary-color);
+    font-size: 2.5em;
+    animation: pulse 2s infinite;
+}
+
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content-container,
+.form-container,
+.reservas-list {
+    flex: 1;
+    min-width: 300px;
+    margin: 10px;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.content-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    width: 100%;
+}
+
+.form-container h2,
+.reservas-list h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.5em;
+}
+
+.form-container input[type="text"],
+.form-container input[type="datetime-local"],
+.form-container input[type="number"],
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1em;
+    margin-bottom: 10px;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.form-container input[type="text"]:focus,
+.form-container input[type="datetime-local"]:focus,
+.form-container input[type="number"]:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+    border-color: var(--primary-color);
+    background-color: var(--input-focus);
+    outline: none;
+}
+
+.form-container textarea {
+    height: 100px;
+}
+
+.form-container input[type="submit"],
+button {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    width: 100%;
+    font-size: 1em;
+}
+
+.form-container input[type="submit"]:hover,
+button:hover {
+    background-color: #45a049;
+}
+
+.reservas-list ul,
+.servicos-list,
+.feedbacks-list,
+.correspondencias-list,
+.veiculos-list,
+.emergencias-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.reservas-list li,
+.servicos-list li,
+.feedbacks-list li,
+.correspondencias-list li,
+.veiculos-list li,
+.emergencias-list li {
+    background-color: var(--input-bg);
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.reservas-list li:hover,
+.servicos-list li:hover,
+.feedbacks-list li:hover,
+.correspondencias-list li:hover,
+.veiculos-list li:hover {
+    background-color: var(--input-focus);
+}
+
+.reserva-detail {
+    margin-right: 15px;
+}
+
+.reservas-list button {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 0.9em;
+}
+
+.reservas-list button:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para o formulário de status em manutencao.html */
+.status-form {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-form label {
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.status-form select {
+    padding: 5px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.status-form select:focus {
+    border-color: var(--primary-color);
+    background-color: var(--input-focus);
+    outline: none;
+}
+
+.status-form button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+
+/* Estilos para a página de administração */
+.admin-page .hero {
+    padding: 30px 0;
+    background: linear-gradient(135deg, var(--header-color), var(--background-color));
+    text-align: center;
+}
+
+.admin-page .hero h1 {
+    color: var(--primary-color);
+    font-size: 2.5em;
+    animation: pulse 2s infinite;
+}
+
+.admin-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-features .feature {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.admin-features .feature:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+.admin-features .feature-icon {
+    font-size: 2em;
+    color: var(--primary-color);
+}
+
+.admin-features h3 {
+    font-size: 1.2em;
+    color: var(--primary-color);
+    margin: 10px 0;
+}
+
+.admin-features p {
+    font-size: 0.9em;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.btn-admin {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    width: 100%;
+    font-size: 1em;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-admin:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para o quadro de moradores */
+.moradores-box {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.moradores-box:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+.moradores-box .morador-icon {
+    font-size: 2em;
+    color: var(--primary-color);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.moradores-box h3 {
+    font-size: 1.2em;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.moradores-box p {
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+/* Estilos para a página de moradores */
+.moradores-page .content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.moradores-table-container {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.moradores-table-container h2 {
+    color: var(--primary-color);
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.moradores-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.moradores-table th,
+.moradores-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.moradores-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.moradores-table tr:nth-child(even) {
+    background-color: #3a3a3a; /* Cor ligeiramente mais clara para linhas pares */
+}
+
+.moradores-table tr:hover {
+    background-color: var(--input-focus);
+    transition: background-color 0.3s;
+}
+
+/* Estilos para o formulário de edição na tabela de moradores */
+.moradores-table .edit-form {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    width: 100%;
+    display: table-row; /* Faz o formulário se comportar como uma linha da tabela */
+}
+
+.moradores-table .edit-form td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.moradores-table .edit-form label {
+    display: none; /* Esconde os rótulos para manter o layout limpo */
+}
+
+.moradores-table .edit-form input[type="text"],
+.moradores-table .edit-form input[type="email"] {
+    width: 100%;
+    padding: 8px;
+    margin: 0;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.9em;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.moradores-table .edit-form input[type="text"]:focus,
+.moradores-table .edit-form input[type="email"]:focus {
+    border-color: var(--primary-color);
+    background-color: var(--input-focus);
+    outline: none;
+}
+
+.moradores-table .edit-form input[type="submit"] {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    width: auto;
+    font-size: 0.9em;
+}
+
+.moradores-table .edit-form input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Estilos para ações de aviso */
+.aviso-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit, .btn-delete {
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-edit:hover {
+    background-color: #45a049;
+}
+
+.btn-delete {
+    background-color: #e74c3c; /* Vermelho para exclusão */
+}
+
+.btn-delete:hover {
+    background-color: #c0392b;
+}
+
+/* Estilos para o modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fundo escuro semi-transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.modal-content h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-around;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+}
+
+.confirm-cancel {
+    background-color: #e74c3c; /* Vermelho para confirmação de cancelamento */
+    color: white;
+}
+
+.confirm-cancel:hover {
+    background-color: #c0392b;
+}
+
+.cancel-modal {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.cancel-modal:hover {
+    background-color: var(--input-focus);
+}
+
+/* Media Queries para Responsividade */
+@media screen and (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menu {
+        flex-direction: row;
+        width: auto;
+        margin-top: 10px;
+    }
+
+    .menu li {
+        margin: 0 5px;
+    }
+
+    .menu a {
+        padding: 0.5rem;
+        width: auto;
+    }
+
+    .content {
+        flex-direction: column;
+    }
+
+    .form-container,
+    .reservas-list,
+    .content-container,
+    .avisos-list,
+    .mensagens-list {
+        min-width: 100%;
+    }
+
+    .comunicados {
+        padding: 10px;
+    }
+
+    .avisos, .mensagens {
+        padding: 15px;
+    }
+
+    .comunicados h2 {
+        font-size: 1.5rem;
+    }
+
+    .avisos h3, .mensagens h3 {
+        font-size: 1.2rem;
+    }
+
+    .status-form {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .status-form select,
+    .status-form button {
+        width: 100%;
+    }
+
+    .moradores-table {
+        display: block;
+        overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+    }
+
+    .moradores-table th,
+    .moradores-table td {
+        min-width: 120px; /* Garante largura mínima para legibilidade */
+    }
+
+    .moradores-table .edit-form {
+        display: block; /* Em telas pequenas, o formulário volta a ser um bloco */
+    }
+}

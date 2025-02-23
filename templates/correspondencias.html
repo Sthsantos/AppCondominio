@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correspondências - Administração de Condomínios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                    {% if session.get('tipo_usuario') == 'admin' %}
+                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="correspondencias-page">
+        <section class="hero">
+            <h1 class="animate-text">Correspondências</h1>
+        </section>
+        <div class="content">
+            <div class="correspondencias-list-container">
+                {% if session.get('tipo_usuario') == 'admin' %}
+                    <!-- Correspondências Recebidas (Não Entregues) -->
+                    <h2>Correspondências Recebidas (Não Entregues)</h2>
+                    <ul class="correspondencias-list">
+                        {% if correspondencias|selectattr('status', 'equalto', 'Recebida')|list|length > 0 %}
+                            {% for correspondencia in correspondencias if correspondencia['status'] == 'Recebida' %}
+                                <li>
+                                    <strong>Destinatário:</strong> {{ correspondencia['usuario_nome'] }}<br>
+                                    <strong>Tipo:</strong> {{ correspondencia['tipo'] }}<br>
+                                    <strong>Descrição:</strong> {{ correspondencia['descricao'] }}<br>
+                                    <strong>Data de Recebimento:</strong> {{ correspondencia['data_recebimento'] }}<br>
+                                    <strong>Status:</strong> {{ correspondencia['status'] }}
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="no-data">Nenhuma correspondência recebida pendente.</li>
+                        {% endif %}
+                    </ul>
+
+                    <!-- Correspondências Entregues -->
+                    <h2>Correspondências Entregues</h2>
+                    <ul class="correspondencias-list">
+                        {% if correspondencias|selectattr('status', 'equalto', 'Entregue')|list|length > 0 %}
+                            {% for correspondencia in correspondencias if correspondencia['status'] == 'Entregue' %}
+                                <li>
+                                    <strong>Destinatário:</strong> {{ correspondencia['usuario_nome'] }}<br>
+                                    <strong>Tipo:</strong> {{ correspondencia['tipo'] }}<br>
+                                    <strong>Descrição:</strong> {{ correspondencia['descricao'] }}<br>
+                                    <strong>Data de Recebimento:</strong> {{ correspondencia['data_recebimento'] }}<br>
+                                    <strong>Status:</strong> {{ correspondencia['status'] }}
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="no-data">Nenhuma correspondência entregue registrada.</li>
+                        {% endif %}
+                    </ul>
+                {% else %}
+                    <!-- Para usuários comuns -->
+                    <h2>Suas Correspondências</h2>
+                    <ul class="correspondencias-list">
+                        {% if correspondencias|length > 0 %}
+                            {% for correspondencia in correspondencias %}
+                                <li>
+                                    <strong>Tipo:</strong> {{ correspondencia['tipo'] }}<br>
+                                    <strong>Descrição:</strong> {{ correspondencia['descricao'] }}<br>
+                                    <strong>Data de Recebimento:</strong> {{ correspondencia['data_recebimento'] }}<br>
+                                    <strong>Status:</strong> {{ correspondencia['status'] }}
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="no-data">Nenhuma correspondência registrada.</li>
+                        {% endif %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

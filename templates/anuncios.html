@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anúncios - Administração de Condomínios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            color: var(--text-color);
+        }
+        .modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .modal-content p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .confirm-delete:hover {
+            background-color: #c0392b;
+        }
+        .cancel-modal {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        .cancel-modal:hover {
+            background-color: var(--input-focus);
+        }
+    </style>
+    <script>
+        function showDeleteModal(anuncioId) {
+            const modal = document.getElementById('delete-modal');
+            const form = document.getElementById('delete-form-' + anuncioId);
+            modal.style.display = 'flex';
+            document.getElementById('confirm-delete-btn').onclick = function() {
+                form.submit();
+            };
+        }
+        function hideDeleteModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                    {% if usuario['tipo_usuario'] == 'admin' %}
+                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="anuncios-page">
+        <section class="hero">
+            <h1 class="animate-text">Anúncios</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Criar Novo Anúncio</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="tipo">Tipo:</label>
+                        <select name="tipo" id="tipo" required>
+                            <option value="Compra">Interesse em Compra</option>
+                            <option value="Venda">Venda</option>
+                            <option value="Aluguel">Aluguel</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao">Descrição:</label>
+                        <textarea name="descricao" id="descricao" required placeholder="Descreva seu anúncio (ex.: 'Vendo bicicleta nova', 'Procuro apartamento para alugar')"></textarea>
+                    </div>
+                    <input type="submit" value="Publicar Anúncio">
+                </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul class="flash-messages">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="anuncios-list-container">
+                <h2>Anúncios Registrados</h2>
+                {% if anuncios|length > 0 %}
+                    <ul class="anuncios-list">
+                        {% for anuncio in anuncios %}
+                        <li>
+                            <strong>Usuário:</strong> {{ anuncio['usuario_nome'] }}<br>
+                            <strong>Tipo:</strong> {{ anuncio['tipo'] }}<br>
+                            <strong>Descrição:</strong> {{ anuncio['descricao'] }}<br>
+                            <strong>Data:</strong> {{ anuncio['data_criacao'] }}<br>
+                            {% if anuncio['usuario_id'] == session['user_id'] %}
+                                <form method="POST" style="display: inline;" id="delete-form-{{ anuncio['id'] }}">
+                                    <input type="hidden" name="delete_anuncio_id" value="{{ anuncio['id'] }}">
+                                    <button type="button" class="btn-delete" onclick="showDeleteModal({{ anuncio['id'] }})">
+                                        <i class="fas fa-trash"></i> Excluir
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-data">Nenhum anúncio registrado ainda.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Modal de Confirmação de Exclusão -->
+        <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <h3>Confirmação de Exclusão</h3>
+                <p>Tem certeza que deseja excluir este anúncio?</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="confirm-delete">Sim</button>
+                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

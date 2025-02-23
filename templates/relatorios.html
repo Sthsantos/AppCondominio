@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="relatorios-page">
+        <section class="hero">
+            <h1 class="animate-text">Relatórios</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Gerar Relatório</h2>
+                <form method="POST">
+                    <label for="tipo_relatorio">Tipo de Relatório:</label>
+                    <select id="tipo_relatorio" name="tipo_relatorio" required>
+                        <option value="reservas">Reservas</option>
+                        <option value="pagamentos">Pagamentos</option>
+                    </select>
+
+                    <label for="data_inicio">Data Início (YYYY-MM-DD):</label>
+                    <input type="date" id="data_inicio" name="data_inicio" required>
+
+                    <label for="data_fim">Data Fim (YYYY-MM-DD):</label>
+                    <input type="date" id="data_fim" name="data_fim" required>
+
+                    <input type="submit" value="Gerar Relatório">
+                </form>
+            </div>
+            <div class="relatorios-list">
+                <h2>Relatórios Gerados</h2>
+                <ul>
+                {% for relatorio in relatorios %}
+                    <li>Tipo: {{ relatorio['tipo'] }} - Período: {{ relatorio['data_inicio'] }} a {{ relatorio['data_fim'] }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

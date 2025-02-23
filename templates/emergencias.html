@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergências - Administração de Condomínios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="emergencias-page">
+        <section class="hero">
+            <h1 class="animate-text">Procedimentos de Emergência</h1>
+        </section>
+        <div class="content">
+            <div class="content-container">
+                <h2>Lista de Emergências</h2>
+                <ul class="emergencias-list">
+                    {% for emergencia in emergencias %}
+                    <li>
+                        <h3>{{ emergencia['titulo'] }}</h3>
+                        <p><strong>Procedimento:</strong> {{ emergencia['procedimento'] }}</p>
+                        <p><strong>Contatos:</strong> {{ emergencia['contatos'] }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

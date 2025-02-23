@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="admin-page">
+        <section class="hero">
+            <h1 class="animate-text">Bem-vindo ao Painel de Administração</h1>
+        </section>
+        <section class="admin-features">
+            <a href="{{ url_for('comunicacao') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-bullhorn feature-icon"></i>
+                    <h3>Gerenciar Comunicações</h3>
+                    <p>Envie avisos e mantenha todos os moradores informados.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('relatorios') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-chart-bar feature-icon"></i>
+                    <h3>Gerenciar Relatórios</h3>
+                    <p>Gere relatórios detalhados sobre reservas, pagamentos e outras atividades.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('manutencao') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-tools feature-icon"></i>
+                    <h3>Gerenciar Manutenção</h3>
+                    <p>Acompanhe e atualize o status dos serviços de manutenção.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('correspondencias') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-envelope feature-icon"></i>
+                    <h3>Gerenciar Correspondências</h3>
+                    <p>Registre e acompanhe a entrega de correspondências.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('estacionamento') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-car feature-icon"></i>
+                    <h3>Gerenciar Estacionamento</h3>
+                    <p>Registre veículos e gerencie vagas de estacionamento.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('emergencias') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-exclamation-triangle feature-icon"></i>
+                    <h3>Gerenciar Emergências</h3>
+                    <p>Adicione e atualize informações de emergência.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+            <a href="{{ url_for('cadastro_moradores') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-user-plus feature-icon"></i>
+                    <h3>Cadastrar Moradores</h3>
+                    <p>Adicione novos moradores ao sistema.</p>
+                    <span class="btn-admin">Acessar</span>
+                </div>
+            </a>
+        </section>
+    </main>
+</body>
+</html>

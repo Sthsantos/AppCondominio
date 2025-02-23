@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback dos Moradores - Administração de Condomínios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .star-rating {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 1.5em;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f5b301;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            color: var(--text-color);
+        }
+        .modal-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .modal-content p {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        .modal-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1em;
+        }
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .confirm-delete:hover {
+            background-color: #c0392b;
+        }
+        .cancel-modal {
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        .cancel-modal:hover {
+            background-color: var(--input-focus);
+        }
+    </style>
+    <script>
+        function toggleRespostaForm(feedbackId) {
+            const form = document.getElementById('resposta-form-' + feedbackId);
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+        }
+        function toggleClassificacaoForm(feedbackId) {
+            const form = document.getElementById('classificacao-form-' + feedbackId);
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+        }
+        function showDeleteModal(feedbackId) {
+            const modal = document.getElementById('delete-modal');
+            const form = document.getElementById('delete-form-' + feedbackId);
+            modal.style.display = 'flex';
+            document.getElementById('confirm-delete-btn').onclick = function() {
+                form.submit();
+            };
+        }
+        function hideDeleteModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">Administração de Condomínios</div>
+            <nav>
+                <ul class="menu">
+                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
+                    {% if usuario['tipo_usuario'] == 'admin' %}
+                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="feedback-page">
+        <section class="hero">
+            <h1 class="animate-text">Feedback dos Moradores</h1>
+        </section>
+        <div class="content">
+            <div class="form-container">
+                <h2>Enviar Novo Feedback</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="tipo">Tipo:</label>
+                        <select name="tipo" id="tipo" required>
+                            <option value="Sugestão">Sugestão</option>
+                            <option value="Reclamação">Reclamação</option>
+                            <option value="Elogio">Elogio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mensagem">Mensagem:</label>
+                        <textarea name="mensagem" id="mensagem" required></textarea>
+                    </div>
+                    <input type="submit" value="Enviar Feedback">
+                </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul class="flash-messages">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="feedbacks-list-container">
+                <h2>Feedbacks Registrados</h2>
+                {% if feedbacks|length > 0 %}
+                    <ul class="feedbacks-list">
+                        {% for feedback in feedbacks %}
+                        <li>
+                            <strong>Usuário:</strong> {{ feedback['usuario_nome'] }}<br>
+                            <strong>Tipo:</strong> {{ feedback['tipo'] }}<br>
+                            <strong>Mensagem:</strong> {{ feedback['mensagem'] }}<br>
+                            <strong>Data:</strong> {{ feedback['data_envio'] }}<br>
+                            {% if feedback['resposta_admin'] %}
+                                <strong>Resposta da Administração:</strong> {{ feedback['resposta_admin'] }}<br>
+                                <strong>Data da Resposta:</strong> {{ feedback['data_resposta'] }}<br>
+                            {% endif %}
+                            {% if feedback['classificacao_usuario'] %}
+                                <strong>Classificação:</strong> 
+                                {% for i in range(5) %}
+                                    <i class="fas fa-star" style="color: {{ '#f5b301' if i < feedback['classificacao_usuario'] else '#ccc' }};"></i>
+                                {% endfor %}<br>
+                                <strong>Resolução:</strong> {{ feedback['resolvido_usuario'] }}<br>
+                            {% endif %}
+                            {% if usuario['tipo_usuario'] == 'admin' and not feedback['resposta_admin'] %}
+                                <button onclick="toggleRespostaForm({{ feedback['id'] }})" class="btn-edit">Responder</button>
+                                <div id="resposta-form-{{ feedback['id'] }}" class="edit-form" style="display: none;">
+                                    <form method="POST">
+                                        <input type="hidden" name="feedback_id" value="{{ feedback['id'] }}">
+                                        <textarea name="resposta_admin" required placeholder="Digite sua resposta"></textarea>
+                                        <input type="submit" value="Enviar Resposta">
+                                    </form>
+                                </div>
+                            {% endif %}
+                            {% if feedback['usuario_id'] == session['user_id'] and feedback['resposta_admin'] and not feedback['classificacao_usuario'] %}
+                                <button onclick="toggleClassificacaoForm({{ feedback['id'] }})" class="btn-edit">Classificar Resolução</button>
+                                <div id="classificacao-form-{{ feedback['id'] }}" class="edit-form" style="display: none;">
+                                    <form method="POST">
+                                        <input type="hidden" name="feedback_id" value="{{ feedback['id'] }}">
+                                        <div class="star-rating">
+                                            <input type="radio" id="star5-{{ feedback['id'] }}" name="classificacao_usuario" value="5" required>
+                                            <label for="star5-{{ feedback['id'] }}"><i class="fas fa-star"></i></label>
+                                            <input type="radio" id="star4-{{ feedback['id'] }}" name="classificacao_usuario" value="4">
+                                            <label for="star4-{{ feedback['id'] }}"><i class="fas fa-star"></i></label>
+                                            <input type="radio" id="star3-{{ feedback['id'] }}" name="classificacao_usuario" value="3">
+                                            <label for="star3-{{ feedback['id'] }}"><i class="fas fa-star"></i></label>
+                                            <input type="radio" id="star2-{{ feedback['id'] }}" name="classificacao_usuario" value="2">
+                                            <label for="star2-{{ feedback['id'] }}"><i class="fas fa-star"></i></label>
+                                            <input type="radio" id="star1-{{ feedback['id'] }}" name="classificacao_usuario" value="1">
+                                            <label for="star1-{{ feedback['id'] }}"><i class="fas fa-star"></i></label>
+                                        </div>
+                                        <select name="resolvido_usuario" required>
+                                            <option value="Resolvido">Resolvido</option>
+                                            <option value="Não Resolvido">Não Resolvido</option>
+                                        </select>
+                                        <input type="submit" value="Enviar Classificação">
+                                    </form>
+                                </div>
+                            {% endif %}
+                            {% if usuario['tipo_usuario'] == 'admin' and feedback['classificacao_usuario'] %}
+                                <form method="POST" style="display: inline;" id="delete-form-{{ feedback['id'] }}">
+                                    <input type="hidden" name="delete_feedback_id" value="{{ feedback['id'] }}">
+                                    <button type="button" class="btn-delete" onclick="showDeleteModal({{ feedback['id'] }})">Excluir</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-data">Nenhum feedback registrado ainda.</p>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Modal de Confirmação de Exclusão -->
+        <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <h3>Confirmação de Exclusão</h3>
+                <p>Tem certeza que deseja excluir este feedback?</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="confirm-delete">Sim</button>
+                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
