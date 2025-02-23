@@ -18,6 +18,33 @@
         function hideDeleteModal() {
             document.getElementById('delete-modal').style.display = 'none';
         }
+
+        function showImageModal(anuncioId) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('modal-image');
+            const details = document.getElementById('modal-details');
+            const anuncio = document.querySelector(`[data-anuncio-id="${anuncioId}"]`);
+
+            const imgSrc = anuncio.querySelector('.anuncio-imagem').src;
+            const usuario = anuncio.querySelector('.usuario-nome').textContent;
+            const tipo = anuncio.querySelector('.anuncio-tipo').textContent;
+            const titulo = anuncio.querySelector('.anuncio-titulo').textContent;
+            const descricao = anuncio.querySelector('.anuncio-descricao').textContent;
+            const data = anuncio.querySelector('.anuncio-data').textContent;
+
+            img.src = imgSrc;
+            details.innerHTML = `
+                <strong>Usuário:</strong> ${usuario}<br>
+                <strong>Tipo:</strong> ${tipo}<br>
+                <strong>Título:</strong> ${titulo}<br>
+                <strong>Descrição:</strong> ${descricao}<br>
+                <strong>Data:</strong> ${data}
+            `;
+            modal.style.display = 'flex';
+        }
+        function hideImageModal() {
+            document.getElementById('image-modal').style.display = 'none';
+        }
     </script>
 </head>
 <body>
@@ -59,10 +86,10 @@
                     </div>
                     <div class="form-group">
                         <label for="descricao">Descrição:</label>
-                        <textarea name="descricao" id="descricao" required placeholder="Descreva seu anúncio"></textarea>
+                        <textarea name="descricao" id="descricao" required placeholder="Descreva seu anúncio aqui"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="imagem">Anexar Imagem (cartão, logotipo, etc.):</label>
+                        <label for="imagem">Imagem (cartão, logotipo, etc.):</label>
                         <input type="file" name="imagem" id="imagem" accept="image/*">
                     </div>
                     <input type="submit" value="Publicar Anúncio">
@@ -86,14 +113,15 @@
                         {% if anuncios_categoria|length > 0 %}
                             <ul class="anuncios-list">
                                 {% for anuncio in anuncios_categoria %}
-                                <li>
-                                    <strong>Usuário:</strong> {{ anuncio['usuario_nome'] }}<br>
-                                    <strong>Título:</strong> {{ anuncio['titulo'] }}<br>
-                                    <strong>Descrição:</strong> {{ anuncio['descricao'] }}<br>
+                                <li data-anuncio-id="{{ anuncio['id'] }}">
+                                    <span class="usuario-nome">{{ anuncio['usuario_nome'] }}</span><br>
+                                    <strong>Tipo:</strong> <span class="anuncio-tipo">{{ anuncio['tipo'] }}</span><br>
+                                    <strong>Título:</strong> <span class="anuncio-titulo">{{ anuncio['titulo'] }}</span><br>
+                                    <strong>Descrição:</strong> <span class="anuncio-descricao">{{ anuncio['descricao'] }}</span><br>
                                     {% if anuncio['imagem'] %}
-                                        <img src="{{ url_for('static', filename='uploads/' + anuncio['imagem']) }}" alt="Imagem do Anúncio" class="anuncio-imagem">
+                                        <img src="{{ url_for('static', filename='uploads/' + anuncio['imagem']) }}" alt="Imagem do Anúncio" class="anuncio-imagem" onclick="showImageModal({{ anuncio['id'] }})">
                                     {% endif %}
-                                    <strong>Data:</strong> {{ anuncio['data_criacao'] }}<br>
+                                    <strong>Data:</strong> <span class="anuncio-data">{{ anuncio['data_criacao']|strftime('%d/%m/%Y %H:%M') }}</span><br>
                                     {% if anuncio['usuario_id'] == session['user_id'] %}
                                         <form method="POST" style="display: inline;" id="delete-form-{{ anuncio['id'] }}">
                                             <input type="hidden" name="delete_anuncio_id" value="{{ anuncio['id'] }}">
@@ -121,6 +149,14 @@
                     <button id="confirm-delete-btn" class="confirm-delete">Sim</button>
                     <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
                 </div>
+            </div>
+        </div>
+        <!-- Modal de Visualização de Imagem -->
+        <div id="image-modal" class="modal">
+            <div class="modal-content image-modal-content">
+                <img id="modal-image" src="" alt="Imagem Ampliada" class="modal-image">
+                <div id="modal-details" class="modal-details"></div>
+                <button onclick="hideImageModal()" class="cancel-modal">Fechar</button>
             </div>
         </div>
     </main>
