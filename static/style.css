@@ -42,7 +42,7 @@ header {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 clamp(1rem, 3vw, 2rem);
-    flex-wrap: nowrap; /* Mantém ícones lado a lado por padrão */
+    flex-wrap: nowrap;
 }
 
 .logo {
@@ -59,7 +59,7 @@ header {
 }
 
 .menu li {
-    margin: 0; /* Remove margens extras */
+    margin: 0;
 }
 
 .menu a {
@@ -704,7 +704,7 @@ button:hover {
 
 .moradores-table th,
 .moradores-table td {
-    padding: 10px;
+    padding: clamp(8px, 2vw, 10px);
     text-align: left;
     border-bottom: 1px solid var(--border-color);
     font-size: clamp(0.8em, 2vw, 0.9em);
@@ -727,27 +727,23 @@ button:hover {
 }
 
 /* Estilos para o formulário de edição na tabela de moradores */
-.moradores-table .edit-form {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    width: 100%;
-    display: table-row;
-}
-
-.moradores-table .edit-form td {
+.edit-form {
+    margin-top: 10px;
     padding: 10px;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--border-color);
+    background-color: #3a3a3a; /* Ajustado para combinar com o tema escuro */
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
 }
 
-.moradores-table .edit-form label {
-    display: none;
+.edit-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color);
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
-.moradores-table .edit-form input[type="text"],
-.moradores-table .edit-form input[type="email"] {
+.edit-form input[type="text"],
+.edit-form input[type="email"] {
     width: 100%;
     padding: 8px;
     background-color: var(--input-bg);
@@ -755,17 +751,18 @@ button:hover {
     border-radius: 4px;
     color: var(--text-color);
     font-size: clamp(0.8em, 2vw, 0.9em);
+    margin-bottom: 10px;
     transition: border-color 0.3s, background-color 0.3s;
 }
 
-.moradores-table .edit-form input[type="text"]:focus,
-.moradores-table .edit-form input[type="email"]:focus {
+.edit-form input[type="text"]:focus,
+.edit-form input[type="email"]:focus {
     border-color: var(--primary-color);
     background-color: var(--input-focus);
     outline: none;
 }
 
-.moradores-table .edit-form input[type="submit"] {
+.edit-form input[type="submit"] {
     background-color: var(--primary-color);
     border: none;
     color: white;
@@ -773,11 +770,11 @@ button:hover {
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s;
-    width: auto;
+    width: 100%;
     font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
-.moradores-table .edit-form input[type="submit"]:hover {
+.edit-form input[type="submit"]:hover {
     background-color: #45a049;
 }
 
@@ -789,29 +786,29 @@ button:hover {
 }
 
 .btn-edit, .btn-delete {
-    background-color: var(--primary-color);
+    background-color: #5bc0de; /* Azul claro para "editar" */
     border: none;
     color: white;
-    padding: 5px 10px;
-    cursor: pointer;
+    padding: clamp(3px, 1vw, 5px) clamp(5px, 1.5vw, 10px);
     border-radius: 4px;
+    cursor: pointer;
     transition: background-color 0.3s;
-    font-size: clamp(0.8em, 2vw, 0.9em);
+    font-size: clamp(0.7em, 2vw, 0.9em);
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
 .btn-edit:hover {
-    background-color: #45a049;
+    background-color: #31b0d5;
 }
 
 .btn-delete {
-    background-color: #e74c3c;
+    background-color: #d9534f; /* Vermelho para "excluir" */
 }
 
 .btn-delete:hover {
-    background-color: #c0392b;
+    background-color: #c9302c;
 }
 
 /* Estilos para o modal */
@@ -829,7 +826,7 @@ button:hover {
 }
 
 .modal-content {
-    background-color: #333;
+    background-color: #333; /* Ajustado para tema escuro */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -857,7 +854,7 @@ button:hover {
 }
 
 .modal-actions button {
-    padding: 10px 20px;
+    padding: clamp(6px, 2vw, 8px) clamp(10px, 3vw, 16px);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -866,22 +863,22 @@ button:hover {
     width: 100%;
 }
 
-.confirm-cancel {
-    background-color: #e74c3c;
+.confirm-delete {
+    background-color: #d9534f;
     color: white;
 }
 
-.confirm-cancel:hover {
-    background-color: #c0392b;
+.confirm-delete:hover {
+    background-color: #c9302c;
 }
 
 .cancel-modal {
-    background-color: var(--input-bg);
-    color: var(--text-color);
+    background-color: #5bc0de;
+    color: white;
 }
 
 .cancel-modal:hover {
-    background-color: var(--input-focus);
+    background-color: #31b0d5;
 }
 
 /* Media Queries para Responsividade */
@@ -947,16 +944,23 @@ button:hover {
 
     .moradores-table {
         display: block;
-        overflow-x: auto;
+        overflow-x: auto; /* Rolagem horizontal */
+        width: 100%;
     }
 
     .moradores-table th,
     .moradores-table td {
-        min-width: 100px;
+        min-width: 100px; /* Largura mínima para legibilidade */
+        padding: clamp(5px, 1vw, 8px);
     }
 
     .moradores-table .edit-form {
         display: block;
+    }
+
+    .edit-form input[type="text"],
+    .edit-form input[type="email"] {
+        margin-bottom: 5px;
     }
 
     .modal-actions {
@@ -989,7 +993,16 @@ button:hover {
 
     .moradores-table th,
     .moradores-table td {
-        padding: 8px;
-        font-size: 0.8em;
+        padding: clamp(3px, 1vw, 5px);
+        font-size: clamp(0.7em, 1.8vw, 0.8em);
+    }
+
+    .btn-edit, .btn-delete {
+        padding: clamp(2px, 0.8vw, 3px) clamp(4px, 1vw, 5px);
+        font-size: clamp(0.6em, 1.8vw, 0.8em);
+    }
+
+    .edit-form {
+        padding: 5px;
     }
 }
