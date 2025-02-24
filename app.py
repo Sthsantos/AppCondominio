@@ -888,6 +888,33 @@ def emergencias():
     conn.close()
     return render_template('emergencias.html', emergencias=emergencias)
 
+@app.route('/edit_emergencia/<int:emergencia_id>', methods=['POST'])
+@admin_required
+def edit_emergencia(emergencia_id):
+    conn = get_db_connection()
+    titulo = request.form['titulo']
+    procedimento = request.form['procedimento']
+    contatos = request.form['contatos']
+    
+    cur = conn.cursor()
+    cur.execute('''UPDATE emergencias SET titulo = ?, procedimento = ?, contatos = ?
+                   WHERE id = ?''', (titulo, procedimento, contatos, emergencia_id))
+    conn.commit()
+    conn.close()
+    flash('Emergência atualizada com sucesso!', 'success')
+    return redirect(url_for('emergencias'))
+
+@app.route('/delete_emergencia/<int:emergencia_id>', methods=['POST'])
+@admin_required
+def delete_emergencia(emergencia_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM emergencias WHERE id = ?', (emergencia_id,))
+    conn.commit()
+    conn.close()
+    flash('Emergência excluída com sucesso!', 'success')
+    return redirect(url_for('emergencias'))
+
 @app.route('/anuncios', methods=['GET', 'POST'])
 def anuncios():
     if 'user_id' not in session:
