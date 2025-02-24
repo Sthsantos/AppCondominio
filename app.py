@@ -304,27 +304,27 @@ def mensagens():
         return redirect(url_for('login'))
 
     conn = get_db_connection()
+    usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
     mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
                             (session['user_id'],)).fetchall()
     conn.close()
-    return render_template('mensagens.html', mensagens=mensagens)
+    return render_template('mensagens.html', mensagens=mensagens, usuario=usuario)
 
 @app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
+@admin_required
 def delete_mensagem(mensagem_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ? AND destinatario_id = ?', 
-                (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id, session['user_id']))
-    if not cur.rowcount:
-        conn.close()
+    # Verifica se a mensagem pertence ao administrador como remetente
+    mensagem = conn.execute('SELECT remetente_id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
+    if mensagem and mensagem['remetente_id'] == session['user_id']:
+        cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ?',
+                    (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id))
+        conn.commit()
+        flash('Mensagem excluída com sucesso!', 'success')
+    else:
         flash('Você não tem permissão para excluir esta mensagem!', 'error')
-        return redirect(url_for('mensagens'))
-    conn.commit()
     conn.close()
-    flash('Mensagem excluída com sucesso!', 'success')
     return redirect(url_for('mensagens'))
 
 @app.route('/login', methods=['GET', 'POST'])
