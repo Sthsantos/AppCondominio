@@ -294,11 +294,20 @@ def index():
     conn = get_db_connection()
     usuario = conn.execute('SELECT nome, tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
     avisos = conn.execute('SELECT * FROM avisos ORDER BY data_envio DESC').fetchall()
-    mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
-                            (session['user_id'],)).fetchall()
     moradores = conn.execute('SELECT * FROM usuarios WHERE tipo_usuario = "usuario"').fetchall()
     conn.close()
-    return render_template('index.html', usuario=usuario, avisos=avisos, mensagens=mensagens, moradores=moradores)
+    return render_template('index.html', usuario=usuario, avisos=avisos, moradores=moradores)
+
+@app.route('/mensagens')
+def mensagens():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
+                            (session['user_id'],)).fetchall()
+    conn.close()
+    return render_template('mensagens.html', mensagens=mensagens)
 
 @app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
 def delete_mensagem(mensagem_id):
@@ -312,11 +321,11 @@ def delete_mensagem(mensagem_id):
     if not cur.rowcount:
         conn.close()
         flash('Você não tem permissão para excluir esta mensagem!', 'error')
-        return redirect(url_for('index'))
+        return redirect(url_for('mensagens'))
     conn.commit()
     conn.close()
     flash('Mensagem excluída com sucesso!', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('mensagens'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
