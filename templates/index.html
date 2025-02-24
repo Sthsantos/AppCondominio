@@ -11,12 +11,13 @@
     <script>
         // Configuração do Firebase para appcondominio-2fcac
         const firebaseConfig = {
-            apiKey: "AIzaSyAJ4KtuG5s8rGYiY4vWm6xW2mCozbN8mZg", // Substitua pelo valor real do Firebase Console
+            apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
             authDomain: "appcondominio-2fcac.firebaseapp.com",
             projectId: "appcondominio-2fcac",
             storageBucket: "appcondominio-2fcac.appspot.com",
-            messagingSenderId: "117990932930345036538", // Usando client_id como sender ID (verifique no Firebase Console)
-            appId: "1:117990932930345036538:web:SEU_APP_ID_AQUI" // Substitua pelo App ID real do Firebase Console
+            messagingSenderId: "454281232654",
+            appId: "1:454281232654:web:647583086f3d4ed730175f",
+            measurementId: "G-SN7T6D7FTE"
         };
 
         // Inicializar Firebase
@@ -27,7 +28,7 @@
         function registerPush() {
             messaging.requestPermission()
                 .then(() => {
-                    return messaging.getToken({ vapidKey: "SEU_VAPID_KEY_AQUI" }); // Substitua pela chave VAPID
+                    return messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }); // Substitua pela chave VAPID
                 })
                 .then((token) => {
                     console.log('Token FCM:', token);
@@ -104,7 +105,7 @@
             {% endif %}
         </section>
 
-        <!-- Seção para avisos e mensagens -->
+        <!-- Seção para avisos -->
         <section class="comunicados">
             <h2>Comunicados</h2>
 
@@ -122,28 +123,6 @@
                     </ul>
                 {% else %}
                     <p>Nenhum aviso geral no momento.</p>
-                {% endif %}
-            </div>
-
-            <!-- Mensagens Específicas -->
-            <div class="mensagens">
-                <h3>Mensagens Pessoais</h3>
-                {% if mensagens|length > 0 %}
-                    <ul>
-                        {% for mensagem in mensagens %}
-                            <li>
-                                <strong>{{ mensagem['titulo'] }}</strong> - {{ mensagem['data_envio'] }}<br>
-                                <p>{{ mensagem['mensagem'] }}</p>
-                                <form method="POST" action="{{ url_for('delete_mensagem', mensagem_id=mensagem['id']) }}" style="display: inline;">
-                                    <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">
-                                        <i class="fas fa-trash"></i> Excluir
-                                    </button>
-                                </form>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>Nenhuma mensagem pessoal no momento.</p>
                 {% endif %}
             </div>
         </section>
@@ -182,10 +161,6 @@
                     <p>Acompanhe a entrega de suas correspondências.</p>
                 </div>
             </a>
-            <!-- Opções exclusivas para administradores mantidas na tela inicial apenas se necessário -->
-            {% if session.get('tipo_usuario') == 'admin' %}
-                <!-- Nenhum item admin adicional na tela inicial, todos já estão no menu lateral -->
-            {% endif %}
         </section>
     </main>
 
@@ -203,7 +178,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' and session.get('tipo_usuario') == 'admin' %}active{% endif %}">
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
