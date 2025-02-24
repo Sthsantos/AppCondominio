@@ -50,26 +50,50 @@
                 tipoCorrespondenciaDiv.style.display = 'none';
             }
         }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
     </script>
 </head>
 <body>
     <header>
         <div class="navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo"></div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
-                    <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
-                </ul>
-            </nav>
         </div>
     </header>
+
+    <!-- Menu Lateral -->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
+            <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            {% if session.get('tipo_usuario') == 'admin' %}
+                <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
+                <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
+                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        </ul>
+    </nav>
+
     <main class="comunicacao-page">
         <section class="hero">
             <h1 class="animate-text">Comunicação</h1>
         </section>
-        <div class="content">
+        <section class="content">
             <div class="form-container">
                 <h2>Enviar Comunicado</h2>
                 <form method="POST" action="{{ url_for('comunicacao') }}">
@@ -109,7 +133,7 @@
 
                     <input type="submit" value="Enviar">
                 </form>
-                
+
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
                         <ul class="flash-messages">
@@ -214,7 +238,7 @@
                     {% endif %}
                 </ul>
             </div>
-        </div>
+        </section>
         <!-- Modal de Confirmação de Exclusão -->
         <div id="delete-modal" class="modal" style="display: none;">
             <div class="modal-content">
@@ -227,5 +251,25 @@
             </div>
         </div>
     </main>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anúncios</span>
+        </a>
+        <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Reservas</span>
+        </a>
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Mensagens</span>
+        </a>
+    </nav>
 </body>
 </html>
