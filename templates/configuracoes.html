@@ -3,43 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações</title>
+    <title>Configurações - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 </head>
 <body>
     <header>
         <div class="navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="logo"></div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
-                </ul>
-            </nav>
         </div>
     </header>
+
+    <!-- Menu Lateral -->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
+            <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            {% if session.get('tipo_usuario') == 'admin' %}
+                <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
+                <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
+                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        </ul>
+    </nav>
+
     <main class="configuracoes-page">
         <section class="hero">
             <h1 class="animate-text">Configurações</h1>
         </section>
-        <div class="content">
+        <section class="content">
             <div class="form-container">
                 <h2>Configurações do Sistema</h2>
                 <form method="POST">
-                    <label for="tema">Tema:</label>
-                    <select id="tema" name="tema" required>
-                        <option value="escuro">Escuro</option>
-                        <option value="claro">Claro</option>
-                    </select>
-
-                    <label for="notificacoes">Receber Notificações:</label>
-                    <input type="checkbox" id="notificacoes" name="notificacoes">
-
+                    <div class="form-group">
+                        <label for="tema">Tema:</label>
+                        <select id="tema" name="tema" required>
+                            <option value="escuro">Escuro</option>
+                            <option value="claro">Claro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notificacoes">Receber Notificações:</label>
+                        <input type="checkbox" id="notificacoes" name="notificacoes">
+                    </div>
                     <input type="submit" value="Salvar Configurações">
                 </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul class="flash-messages">
+                            {% for message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
             </div>
-        </div>
+        </section>
     </main>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anúncios</span>
+        </a>
+        <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Reservas</span>
+        </a>
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Mensagens</span>
+        </a>
+    </nav>
 </body>
 </html>
