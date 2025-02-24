@@ -850,21 +850,59 @@ def correspondencias():
 def estacionamento():
     conn = get_db_connection()
     if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
         placa = request.form['placa']
         modelo = request.form['modelo']
         vaga_estacionamento = request.form['vaga_estacionamento']
 
         cur = conn.cursor()
-        cur.execute('''INSERT INTO veiculos (usuario_id, placa, modelo, vaga_estacionamento)
-                        VALUES (?, ?, ?, ?)''', (session['user_id'], placa, modelo, vaga_estacionamento))
-        conn.commit()
-        conn.close()
-        flash('Veículo registrado com sucesso!', 'success')
+        try:
+            cur.execute('''INSERT INTO veiculos (usuario_id, placa, modelo, vaga_estacionamento)
+                            VALUES (?, ?, ?, ?)''', (usuario_id, placa, modelo, vaga_estacionamento))
+            conn.commit()
+            flash('Veículo registrado com sucesso!', 'success')
+        except sqlite3.IntegrityError:
+            flash('Placa já registrada!', 'error')
+        finally:
+            conn.close()
         return redirect(url_for('estacionamento'))
 
-    veiculos = conn.execute('SELECT * FROM veiculos').fetchall()
+    usuarios = conn.execute('SELECT id, nome FROM usuarios WHERE tipo_usuario = "usuario"').fetchall()
+    veiculos = conn.execute('SELECT v.*, u.nome AS usuario_nome FROM veiculos v JOIN usuarios u ON v.usuario_id = u.id').fetchall()
     conn.close()
-    return render_template('estacionamento.html', veiculos=veiculos)
+    return render_template('estacionamento.html', veiculos=veiculos, usuarios=usuarios)
+
+@app.route('/edit_veiculo/<int:veiculo_id>', methods=['POST'])
+@admin_required
+def edit_veiculo(veiculo_id):
+    conn = get_db_connection()
+    usuario_id = request.form['usuario_id']
+    placa = request.form['placa']
+    modelo = request.form['modelo']
+    vaga_estacionamento = request.form['vaga_estacionamento']
+    
+    cur = conn.cursor()
+    try:
+        cur.execute('''UPDATE veiculos SET usuario_id = ?, placa = ?, modelo = ?, vaga_estacionamento = ?
+                       WHERE id = ?''', (usuario_id, placa, modelo, vaga_estacionamento, veiculo_id))
+        conn.commit()
+        flash('Veículo atualizado com sucesso!', 'success')
+    except sqlite3.IntegrityError:
+        flash('Placa já registrada para outro veículo!', 'error')
+    finally:
+        conn.close()
+    return redirect(url_for('estacionamento'))
+
+@app.route('/delete_veiculo/<int:veiculo_id>', methods=['POST'])
+@admin_required
+def delete_veiculo(veiculo_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM veiculos WHERE id = ?', (veiculo_id,))
+    conn.commit()
+    conn.close()
+    flash('Veículo excluído com sucesso!', 'success')
+    return redirect(url_for('estacionamento'))
 
 @app.route('/emergencias', methods=['GET', 'POST'])
 @admin_required
