@@ -10,13 +10,15 @@
         function showDeleteModal(anuncioId) {
             const modal = document.getElementById('delete-modal');
             const form = document.getElementById('delete-form-' + anuncioId);
-            modal.style.display = 'flex';
-            document.getElementById('confirm-delete-btn').onclick = function() {
+            modal.style.display = 'block';
+            modal.querySelector('.confirm-delete').onclick = function() {
                 form.submit();
             };
         }
+
         function hideDeleteModal() {
-            document.getElementById('delete-modal').style.display = 'none';
+            const modal = document.getElementById('delete-modal');
+            modal.style.display = 'none';
         }
 
         function showImageModal(anuncioId) {
@@ -40,8 +42,9 @@
                 <strong>Descrição:</strong> ${descricao}<br>
                 <strong>Data:</strong> ${data}
             `;
-            modal.style.display = 'flex';
+            modal.style.display = 'block';
         }
+
         function hideImageModal() {
             document.getElementById('image-modal').style.display = 'none';
         }
@@ -68,11 +71,12 @@
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
             <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
-            {% if usuario['tipo_usuario'] == 'admin' %}
+            {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
                 <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
@@ -87,7 +91,7 @@
         <section class="hero">
             <h1 class="animate-text">Anúncios</h1>
         </section>
-        <div class="content">
+        <section class="content">
             <div class="form-container">
                 <h2>Criar Novo Anúncio</h2>
                 <form method="POST" enctype="multipart/form-data">
@@ -160,20 +164,20 @@
                     </div>
                 {% endfor %}
             </div>
-        </div>
+        </section>
         <!-- Modal de Confirmação de Exclusão -->
-        <div id="delete-modal" class="modal">
+        <div id="delete-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h3>Confirmação de Exclusão</h3>
                 <p>Tem certeza que deseja excluir este anúncio?</p>
                 <div class="modal-actions">
-                    <button id="confirm-delete-btn" class="confirm-delete">Sim</button>
+                    <button class="confirm-delete">Sim</button>
                     <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
                 </div>
             </div>
         </div>
         <!-- Modal de Visualização de Imagem -->
-        <div id="image-modal" class="modal">
+        <div id="image-modal" class="modal" style="display: none;">
             <div class="modal-content image-modal-content">
                 <img id="modal-image" src="" alt="Imagem Ampliada" class="modal-image">
                 <div id="modal-details" class="modal-details"></div>
@@ -196,7 +200,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' and usuario['tipo_usuario'] == 'admin' %}active{% endif %}">
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
