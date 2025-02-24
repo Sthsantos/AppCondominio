@@ -14,7 +14,7 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Administração de Condomínios</div>
         </div>
     </header>
 
@@ -50,11 +50,13 @@
                             <li>
                                 <strong>{{ mensagem['titulo'] }}</strong> - {{ mensagem['data_envio'] }}<br>
                                 <p>{{ mensagem['mensagem'] }}</p>
-                                <form method="POST" action="{{ url_for('delete_mensagem', mensagem_id=mensagem['id']) }}" style="display: inline;">
-                                    <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">
-                                        <i class="fas fa-trash"></i> Excluir
-                                    </button>
-                                </form>
+                                {% if session.get('tipo_usuario') == 'admin' %}
+                                    <form method="POST" action="{{ url_for('delete_mensagem', mensagem_id=mensagem['id']) }}" style="display: inline;">
+                                        <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>
