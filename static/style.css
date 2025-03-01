@@ -1,112 +1,186 @@
 /* Variáveis CSS para facilitar a manutenção */
 :root {
-    --primary-color: #4CAF50;
-    --background-color: #1a1a1a;
-    --text-color: #e0e0e0;
-    --header-color: #2c3e50;
-    --link-color: #ecf0f1;
-    --hover-color: #34495e;
-    --input-bg: #444;
-    --input-focus: #555;
-    --border-color: #666;
+    --primary-color: #1abc9c; /* Verde turquesa mais sofisticado */
+    --secondary-color: #34495e; /* Azul escuro elegante */
+    --background-color: #f4f6f9; /* Fundo claro e profissional */
+    --text-color: #2c3e50; /* Texto escuro para contraste */
+    --header-color: #2c3e50; /* Cabeçalho azul escuro */
+    --link-color: #ecf0f1; /* Links claros */
+    --hover-color: #16a085; /* Tom mais escuro do primary para hover */
+    --input-bg: #ffffff; /* Fundo branco para inputs */
+    --input-focus: #ecf0f1; /* Cinza claro para foco */
+    --border-color: #d1d5db; /* Cinza suave para bordas */
+    --shadow-color: rgba(0, 0, 0, 0.1); /* Sombra suave */
+    --danger-color: #e74c3c; /* Vermelho para ações de exclusão */
 }
 
-/* Resets e Configurações Gerais */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+/* Estilos básicos para o corpo da página */
 body {
-    font-family: 'Roboto', 'Arial', sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif; /* Fontes modernas */
+    margin: 0;
+    padding: 0;
     line-height: 1.6;
-    padding-bottom: 60px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    font-size: 16px; /* Tamanho base profissional */
 }
 
-/* Header (Comum para todas as páginas) */
+/* Header */
 header {
-    background-color: var(--header-color);
-    padding: clamp(0.5rem, 2vw, 1rem) 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    position: sticky;
-    top: 0;
-    z-index: 900; /* Menor que o sidebar-toggle */
+    width: 100%;
 }
 
+/* Navbar */
 .navbar {
+    background-color: var(--header-color);
+    padding: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 4px 12px var(--shadow-color); /* Sombra mais suave */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 clamp(1rem, 3vw, 2rem);
-    position: relative; /* Para posicionar o sidebar-toggle */
+    border-bottom: 1px solid var(--border-color);
 }
 
-.logo {
-    font-weight: bold;
-    font-size: clamp(1.2em, 4vw, 1.5em);
+/* Botão de toggle do menu lateral */
+.sidebar-toggle {
+    background: none;
+    border: none;
     color: var(--link-color);
-    margin-left: 40px; /* Espaço para o botão sidebar-toggle */
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s ease, transform 0.2s ease;
 }
 
-.menu {
-    list-style: none;
+.sidebar-toggle:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* Logo */
+.logo {
+    font-weight: 600;
+    font-size: 1.5em;
+    color: var(--link-color);
+    text-align: center;
+    letter-spacing: 1px; /* Espaçamento para sofisticação */
+}
+
+/* User Info */
+.user-info {
     display: flex;
-    gap: clamp(5px, 1vw, 15px);
     align-items: center;
+    gap: 10px;
 }
 
-.menu li {
+.user-info span {
+    font-size: 1em;
+    color: var(--link-color);
+    font-weight: 500;
+}
+
+.logout-icon {
+    color: var(--link-color);
+    font-size: 1.4em;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.logout-icon:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* Menu lateral */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    background-color: var(--secondary-color);
+    padding: 20px 0;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    box-shadow: 4px 0 12px var(--shadow-color);
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
     margin: 0;
 }
 
-.menu a {
+.sidebar ul li {
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul li a {
     color: var(--link-color);
     text-decoration: none;
-    padding: clamp(0.3rem, 1vw, 0.5rem) clamp(0.5rem, 1.5vw, 1rem);
-    transition: background-color 0.3s, color 0.3s;
-    border-radius: 4px;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
-    justify-content: center;
+    transition: color 0.3s ease, background-color 0.3s ease, padding-left 0.3s ease;
 }
 
-.menu a i {
-    font-size: clamp(1em, 3vw, 1.5em);
-}
-
-.menu a:hover {
-    background-color: var(--hover-color);
+.sidebar ul li a:hover {
     color: var(--primary-color);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding-left: 25px; /* Efeito de deslocamento */
 }
 
-/* Estilos para index.html */
+.sidebar ul li a i {
+    margin-right: 12px;
+    font-size: 1.2em;
+}
+
+/* Main Content */
+main {
+    margin-top: 70px; /* Ajustado para header maior */
+    padding: 20px;
+}
+
+/* Hero Section */
 .hero {
     text-align: center;
-    padding: clamp(20px, 5vw, 50px) 1rem;
-    background: linear-gradient(135deg, var(--header-color), var(--background-color));
+    padding: 30px 0;
+    background: linear-gradient(135deg, var(--header-color), var(--secondary-color));
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 16px var(--shadow-color);
+    transition: box-shadow 0.3s ease;
+}
+
+.hero:hover {
+    box-shadow: 0 8px 20px var(--shadow-color);
 }
 
 .animate-text {
-    font-size: clamp(1.5em, 5vw, 2.5em);
-    color: var(--primary-color);
-    animation: pulse 2s infinite;
+    font-size: 2.2em;
+    color: var(--link-color);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 1.5s ease-in-out;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* Nova seção de comunicados */
+/* Comunicados */
 .comunicados {
     padding: 20px;
     max-width: 1200px;
@@ -114,54 +188,71 @@ header {
 }
 
 .comunicados h2 {
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    margin-bottom: 20px;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
     color: var(--primary-color);
     text-align: center;
+    font-weight: 600;
 }
 
-.avisos, .mensagens {
-    margin-bottom: 20px;
-    background-color: #333;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.avisos {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.avisos h3, .mensagens h3 {
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
-    color: var(--primary-color);
-    margin-bottom: 15px;
+.avisos:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px var(--shadow-color);
 }
 
-.avisos ul, .mensagens ul {
+.avisos ul {
     list-style: none;
     padding: 0;
 }
 
-.avisos li, .mensagens li {
+.avisos li {
     background-color: var(--input-bg);
-    padding: 10px;
+    padding: 15px;
     margin-bottom: 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+    transition: background-color 0.3s ease;
 }
 
-.avisos li:hover, .mensagens li:hover {
+.avisos li:hover {
     background-color: var(--input-focus);
 }
 
-.avisos li strong, .mensagens li strong {
+.avisos li strong {
     color: var(--primary-color);
-    font-size: clamp(0.9em, 2.5vw, 1.1em);
+    font-size: 1.1em;
+    font-weight: 500;
 }
 
-.avisos p, .mensagens p {
+.avisos p {
     margin: 5px 0 0;
+    font-size: 0.95em;
     color: var(--text-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 
+.comunicados .see-more {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.comunicados .see-more:hover {
+    color: var(--hover-color);
+}
+
+/* Features */
 .features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -177,71 +268,141 @@ header {
 }
 
 .feature-link:hover .feature {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     transform: translateY(-5px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+    background: linear-gradient(145deg, #ffffff, #f0f4f8);
 }
 
 .feature {
-    background-color: #333;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: all 0.3s ease;
     text-align: center;
-    min-height: 150px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    border: 1px solid var(--border-color);
 }
 
 .feature-icon {
-    font-size: clamp(1.5em, 4vw, 2em);
+    font-size: 2.5em;
     color: var(--primary-color);
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+}
+
+.feature-link:hover .feature-icon {
+    transform: scale(1.1);
 }
 
 .feature h3 {
-    font-size: clamp(1em, 3vw, 1.2em);
+    font-size: 1.3em;
     color: var(--primary-color);
-    margin: 10px 0;
+    margin: 5px 0;
+    font-weight: 500;
 }
 
 .feature p {
-    font-size: clamp(0.8em, 2.5vw, 0.9em);
-    margin: 0;
-    flex-grow: 1;
+    display: none; /* Simplificado */
 }
 
-/* Estilos para login.html, cadastro.html e cadastro_moradores.html */
-.login-container {
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--secondary-color);
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 60px);
-    background: url('/static/login-background.jpg') no-repeat center center fixed;
-    background-size: cover;
-    background-color: var(--background-color);
-    padding: 20px;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -4px 12px var(--shadow-color);
+    z-index: 1000;
+    border-top: 1px solid var(--border-color);
 }
 
-.login-form, .form-container {
-    background-color: rgba(51, 51, 51, 0.9);
+.bottom-nav a {
+    color: var(--link-color);
+    text-decoration: none;
+    text-align: center;
+    flex: 1;
+    padding: 8px;
+    transition: all 0.3s ease;
+}
+
+.bottom-nav a.active {
+    color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.bottom-nav i {
+    font-size: 1.5em;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.bottom-nav span {
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* Login Page e Formulários */
+.login-container,
+.cadastro-moradores-page .content,
+.comunicacao-page .content,
+.reservas-page .content,
+.manutencao-page .content,
+.feedback-page .content,
+.correspondencias-page .content,
+.veiculos-page .content,
+.emergencias-page .content,
+.moradores-page .content,
+.forum-page .content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 140px); /* Ajustado para header e bottom-nav */
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--background-color);
+}
+
+.login-form,
+.form-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px var(--shadow-color);
     width: 100%;
     max-width: 400px;
-    text-align: center;
+    text-align: left;
     color: var(--text-color);
+    border: 1px solid var(--border-color);
 }
 
-.login-form h1, .form-container h2 {
+.login-form h1,
+.form-container h2 {
     margin-bottom: 20px;
     color: var(--primary-color);
-    font-size: clamp(1.5em, 4vw, 2em);
+    font-size: 1.8em;
+    font-weight: 600;
+    text-align: center;
 }
 
 .form-group {
     margin-bottom: 15px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--text-color);
 }
 
 .login-form input[type="text"],
@@ -251,22 +412,16 @@ header {
 .form-container input[type="email"],
 .form-container input[type="password"],
 .form-container input[type="number"],
-.form-container input[type="file"] {
+.form-container select,
+.form-container textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 6px;
     color: var(--text-color);
-    font-size: clamp(0.9em, 2.5vw, 1em);
-    transition: border-color 0.3s, background-color 0.3s;
-}
-
-.login-form input[type="email"],
-.login-form input[type="password"],
-.form-container input[type="email"],
-.form-container input[type="password"] {
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .login-form input[type="email"]:focus,
@@ -274,277 +429,283 @@ header {
 .form-container input[type="email"]:focus,
 .form-container input[type="password"]:focus,
 .form-container input[type="text"]:focus,
-.form-container input[type="file"]:focus {
-    border-color: var(--primary-color);
-    background-color: var(--input-focus);
-    outline: none;
-}
-
-.login-form input[type="email"]::placeholder,
-.login-form input[type="password"]::placeholder,
-.form-container input[type="email"]::placeholder,
-.form-container input[type="password"]::placeholder {
-    color: #aaa;
-    opacity: 0.8;
-}
-
-.btn-login, .form-container input[type="submit"] {
-    background-color: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    width: 100%;
-    font-size: clamp(0.9em, 2.5vw, 1em);
-}
-
-.btn-login:hover, .form-container input[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-.flash-messages {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px;
-    border-radius: 4px;
-    margin-top: 15px;
-    text-align: center;
-    font-size: clamp(0.9em, 2.5vw, 1em);
-}
-
-/* Estilos para a página de comunicação */
-.comunicacao-page .content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 20px;
-}
-
-.comunicacao-page .form-container,
-.comunicacao-page .avisos-list,
-.comunicacao-page .mensagens-list {
-    flex: 1;
-    min-width: 300px;
-    margin: 10px;
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.comunicacao-page .form-container label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--text-color);
-    font-size: clamp(0.9em, 2.5vw, 1em);
-}
-
-.comunicacao-page .form-container select,
-.comunicacao-page .form-container input[type="text"],
-.comunicacao-page .form-container textarea {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: clamp(0.9em, 2.5vw, 1em);
-    margin-bottom: 10px;
-    transition: border-color 0.3s, background-color 0.3s;
-}
-
-.comunicacao-page .form-container select:focus,
-.comunicacao-page .form-container input[type="text"]:focus,
-.comunicacao-page .form-container textarea:focus {
-    border-color: var(--primary-color);
-    background-color: var(--input-focus);
-    outline: none;
-}
-
-.comunicacao-page .form-container textarea {
-    height: 100px;
-}
-
-.comunicacao-page .avisos-list h2,
-.comunicacao-page .mensagens-list h2 {
-    color: var(--primary-color);
-    margin-top: 0;
-    font-size: clamp(1.2em, 3vw, 1.5em);
-}
-
-/* Estilos para outras páginas */
-.reservas-page .hero,
-.manutencao-page .hero,
-.feedback-page .hero,
-.correspondencias-page .hero,
-.estacionamento-page .hero,
-.emergencias-page .hero,
-.cadastro-moradores-page .hero,
-.anuncios-page .hero {
-    padding: clamp(20px, 5vw, 30px) 1rem;
-    background: linear-gradient(135deg, var(--header-color), var(--background-color));
-    text-align: center;
-}
-
-.reservas-page .hero h1,
-.manutencao-page .hero h1,
-.feedback-page .hero h1,
-.correspondencias-page .hero h1,
-.estacionamento-page .hero h1,
-.emergencias-page .hero h1,
-.cadastro-moradores-page .hero h1,
-.anuncios-page .hero h1 {
-    color: var(--primary-color);
-    font-size: clamp(1.5em, 5vw, 2.5em);
-    animation: pulse 2s infinite;
-}
-
-.content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 20px;
-    flex: 1;
-}
-
-.content-container,
-.form-container,
-.reservas-list,
-.anuncios-list-container {
-    flex: 1;
-    min-width: 300px;
-    margin: 10px;
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.content-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    width: 100%;
-}
-
-.form-container h2,
-.reservas-list h2,
-.anuncios-list-container h2 {
-    color: var(--primary-color);
-    margin-top: 0;
-    font-size: clamp(1.2em, 3vw, 1.5em);
-}
-
-.form-container input[type="text"],
-.form-container input[type="datetime-local"],
-.form-container input[type="number"],
-.form-container select,
-.form-container textarea {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: clamp(0.9em, 2.5vw, 1em);
-    margin-bottom: 10px;
-    transition: border-color 0.3s, background-color 0.3s;
-}
-
-.form-container input[type="text"]:focus,
-.form-container input[type="datetime-local"]:focus,
 .form-container input[type="number"]:focus,
 .form-container select:focus,
 .form-container textarea:focus {
     border-color: var(--primary-color);
     background-color: var(--input-focus);
     outline: none;
+    box-shadow: 0 0 5px rgba(26, 188, 156, 0.3); /* Aura sutil */
+}
+
+.login-form input[type="email"]::placeholder,
+.login-form input[type="password"]::placeholder,
+.form-container input[type="email"]::placeholder,
+.form-container input[type="password"]::placeholder,
+.form-container input[type="text"]::placeholder,
+.form-container input[type="number"]::placeholder,
+.form-container textarea::placeholder {
+    color: #95a5a6;
+    opacity: 0.8;
 }
 
 .form-container textarea {
-    height: 100px;
+    resize: vertical;
+    min-height: 100px;
 }
 
-.form-container input[type="submit"],
-button {
-    background-color: var(--primary-color);
+.btn-login,
+.form-container input[type="submit"] {
+    background: linear-gradient(135deg, var(--primary-color), var(--hover-color));
     border: none;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 24px;
+    font-size: 1em;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transition: all 0.3s ease;
     width: 100%;
-    font-size: clamp(0.9em, 2.5vw, 1em);
+    font-weight: 500;
 }
 
-.form-container input[type="submit"]:hover,
-button:hover {
-    background-color: #45a049;
+.btn-login:hover,
+.form-container input[type="submit"]:hover {
+    background: linear-gradient(135deg, var(--hover-color), var(--primary-color));
+    box-shadow: 0 6px 16px var(--shadow-color);
+    transform: translateY(-2px);
 }
 
-.reservas-list ul,
+.btn-edit {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, var(--danger-color), #c0392b);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #c0392b, var(--danger-color));
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transform: translateY(-2px);
+}
+
+.flash-messages {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.95em;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Tabelas */
+.moradores-table-container,
+.servicos-list-container,
+.feedbacks-list-container,
+.correspondencias-list-container,
+.veiculos-list-container,
+.emergencias-list-container,
+.anuncios-list-container,
+.forum-list-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px var(--shadow-color);
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    border: 1px solid var(--border-color);
+    transition: box-shadow 0.3s ease;
+}
+
+.moradores-table-container:hover,
+.servicos-list-container:hover,
+.feedbacks-list-container:hover,
+.correspondencias-list-container:hover,
+.veiculos-list-container:hover,
+.emergencias-list-container:hover,
+.anuncios-list-container:hover,
+.forum-list-container:hover {
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+
+.moradores-table-container h2,
+.servicos-list-container h2,
+.feedbacks-list-container h2,
+.correspondencias-list-container h2,
+.veiculos-list-container h2,
+.emergencias-list-container h2,
+.anuncios-list-container h2,
+.forum-list-container h2 {
+    color: var(--primary-color);
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.moradores-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.moradores-table th,
+.moradores-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.moradores-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.95em;
+}
+
+.moradores-table tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.moradores-table tr:hover {
+    background-color: var(--input-focus);
+    transition: background-color 0.3s ease;
+}
+
+/* Listas gerais */
 .servicos-list,
 .feedbacks-list,
 .correspondencias-list,
 .veiculos-list,
 .emergencias-list,
-.anuncios-list {
-    list-style-type: none;
+.anuncios-list,
+.forum-list {
+    list-style: none;
     padding: 0;
 }
 
-.reservas-list li,
 .servicos-list li,
 .feedbacks-list li,
 .correspondencias-list li,
 .veiculos-list li,
 .emergencias-list li,
-.anuncios-list li {
+.anuncios-list li,
+.forum-list li {
     background-color: var(--input-bg);
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    font-size: clamp(0.8em, 2vw, 0.9em);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
 }
 
-.reservas-list li:hover,
 .servicos-list li:hover,
 .feedbacks-list li:hover,
 .correspondencias-list li:hover,
 .veiculos-list li:hover,
-.anuncios-list li:hover {
+.emergencias-list li:hover,
+.anuncios-list li:hover,
+.forum-list li:hover {
     background-color: var(--input-focus);
 }
 
-.reserva-detail {
-    margin-right: 15px;
+.no-data {
+    color: var(--text-color);
+    font-style: italic;
+    text-align: center;
+    font-size: 1em;
+    padding: 10px;
 }
 
-.reservas-list button {
-    background-color: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 5px 10px;
+/* Forum-specific styles */
+.forum-list li {
+    margin-bottom: 20px;
+}
+
+.respostas {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid var(--primary-color);
+}
+
+.resposta {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+/* Feedback-specific styles */
+.star-rating {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 1.5em;
+    color: #ccc;
     cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    font-size: clamp(0.8em, 2vw, 0.9em);
+    transition: color 0.2s ease;
 }
 
-.reservas-list button:hover {
-    background-color: #45a049;
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #f5b301;
 }
 
-/* Estilos para o formulário de status em manutencao.html */
+/* Edit Form */
+.edit-form {
+    margin-top: 10px;
+    padding: 15px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* Status Form */
 .status-form {
     margin-top: 10px;
     display: flex;
@@ -552,758 +713,144 @@ button:hover {
     gap: 10px;
 }
 
-.status-form label {
-    color: var(--text-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-.status-form select {
-    padding: 5px;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
-    transition: border-color 0.3s, background-color 0.3s;
-}
-
-.status-form select:focus {
-    border-color: var(--primary-color);
-    background-color: var(--input-focus);
-    outline: none;
-}
-
-.status-form button {
-    padding: 5px 10px;
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-/* Estilos para a página de administração */
-.admin-page .hero {
-    padding: clamp(20px, 5vw, 30px) 1rem;
-    background: linear-gradient(135deg, var(--header-color), var(--background-color));
-    text-align: center;
-}
-
-.admin-page .hero h1 {
-    color: var(--primary-color);
-    font-size: clamp(1.5em, 5vw, 2.5em);
-    animation: pulse 2s infinite;
-}
-
-.admin-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.admin-features .feature {
-    background-color: #333;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    text-align: center;
-    min-height: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.admin-features .feature:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
-}
-
-.admin-features .feature-icon {
-    font-size: clamp(1.5em, 4vw, 2em);
-    color: var(--primary-color);
-}
-
-.admin-features h3 {
-    font-size: clamp(1em, 3vw, 1.2em);
-    color: var(--primary-color);
-    margin: 10px 0;
-}
-
-.admin-features p {
-    font-size: clamp(0.8em, 2.5vw, 0.9em);
-    margin: 0;
-    flex-grow: 1;
-}
-
-.btn-admin {
-    background-color: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    width: 100%;
-    font-size: clamp(0.9em, 2.5vw, 1em);
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-}
-
-.btn-admin:hover {
-    background-color: #45a049;
-}
-
-/* Estilos para o quadro de moradores */
-.moradores-box {
-    background-color: #333;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    text-align: center;
-    cursor: pointer;
-    position: relative;
-}
-
-.moradores-box:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
-}
-
-.moradores-box .morador-icon {
-    font-size: clamp(1.5em, 4vw, 2em);
-    color: var(--primary-color);
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.moradores-box h3 {
-    font-size: clamp(1em, 3vw, 1.2em);
-    color: var(--primary-color);
-    margin-bottom: 10px;
-}
-
-.moradores-box p {
-    font-size: clamp(0.8em, 2.5vw, 0.9em);
-    margin: 5px 0;
-}
-
-/* Estilos para a página de moradores */
-.moradores-page .content {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.moradores-table-container {
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.moradores-table-container h2 {
-    color: var(--primary-color);
-    font-size: clamp(1.2em, 3vw, 1.5em);
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.moradores-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--input-bg);
-    color: var(--text-color);
-}
-
-.moradores-table th,
-.moradores-table td {
-    padding: clamp(8px, 2vw, 10px);
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-.moradores-table th {
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.moradores-table tr:nth-child(even) {
-    background-color: #3a3a3a;
-}
-
-.moradores-table tr:hover {
-    background-color: var(--input-focus);
-    transition: background-color 0.3s;
-}
-
-/* Estilos para o formulário de edição na tabela de moradores */
-.edit-form {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #3a3a3a;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-}
-
-.edit-form label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--text-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-.edit-form input[type="text"],
-.edit-form input[type="email"] {
-    width: 100%;
-    padding: 8px;
-    background-color: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-color);
-    font-size: clamp(0.8em, 2vw, 0.9em);
-    margin-bottom: 10px;
-    transition: border-color 0.3s, background-color 0.3s;
-}
-
-.edit-form input[type="text"]:focus,
-.edit-form input[type="email"]:focus {
-    border-color: var(--primary-color);
-    background-color: var(--input-focus);
-    outline: none;
-}
-
-.edit-form input[type="submit"] {
-    background-color: var(--primary-color);
-    border: none;
-    color: white;
-    padding: 8px 15px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    width: 100%;
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-.edit-form input[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-/* Estilos para ações de aviso */
-.aviso-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-}
-
-.btn-edit, .btn-delete {
-    background-color: #5bc0de;
-    border: none;
-    color: white;
-    padding: clamp(3px, 1vw, 5px) clamp(5px, 1.5vw, 10px);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: clamp(0.7em, 2vw, 0.9em);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.btn-edit:hover {
-    background-color: #31b0d5;
-}
-
-.btn-delete {
-    background-color: #d9534f;
-}
-
-.btn-delete:hover {
-    background-color: #c9302c;
-}
-
-/* Estilos para o modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    color: var(--text-color);
-}
-
-.modal-content h3 {
-    color: var(--primary-color);
-    margin-bottom: 15px;
-    font-size: clamp(1.2em, 3vw, 1.5em);
-}
-
-.modal-content p {
-    margin-bottom: 20px;
-    font-size: clamp(0.9em, 2.5vw, 1.1em);
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-}
-
-.modal-actions button {
-    padding: clamp(6px, 2vw, 8px) clamp(10px, 3vw, 16px);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: clamp(0.9em, 2.5vw, 1em);
-    width: 100%;
-}
-
-.confirm-delete {
-    background-color: #d9534f;
-    color: white;
-}
-
-.confirm-delete:hover {
-    background-color: #c9302c;
-}
-
-.cancel-modal {
-    background-color: #5bc0de;
-    color: white;
-}
-
-.cancel-modal:hover {
-    background-color: #31b0d5;
-}
-
-/* Estilos para a página de anúncios */
-.anuncios-categoria {
-    margin-bottom: 20px;
-}
-
-.anuncios-categoria h3 {
-    color: var(--primary-color);
-    font-size: clamp(1.1em, 3vw, 1.3em);
-    margin-bottom: 10px;
-}
-
-.anuncios-list {
-    list-style: none;
-    padding: 0;
-}
-
-.anuncios-list li {
-    background-color: var(--input-bg);
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
-.anuncios-list li:hover {
-    background-color: var(--input-focus);
-}
-
-.anuncio-imagem {
-    max-width: 100%;
-    height: auto;
-    margin-top: 10px;
-    border-radius: 4px;
-    max-height: 200px;
-}
-
-/* Mensagem de dados ausentes */
-.no-data {
-    text-align: center;
-    padding: 20px;
-    color: var(--text-color);
-    font-size: clamp(0.9em, 2.5vw, 1.1em);
-}
-
-/* Estilos para o modal de imagem */
-.image-modal-content {
-    background-color: #333;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 800px;
-    text-align: center;
-    color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.modal-image {
-    max-width: 100%;
-    max-height: 60vh;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.modal-details {
-    font-size: clamp(0.9em, 2.5vw, 1.1em);
-    text-align: left;
-}
-
-/* Ajustes na imagem pequena para indicar clicabilidade */
-.anuncio-imagem {
-    max-width: 100%;
-    height: auto;
-    margin-top: 10px;
-    border-radius: 4px;
-    max-height: 200px;
-    cursor: pointer;
-    transition: opacity 0.3s;
-}
-
-.anuncio-imagem:hover {
-    opacity: 0.8;
-}
-
-/* Estilos para a barra inferior */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--header-color);
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 10px 0;
-    z-index: 1000;
-}
-
-.bottom-nav a {
-    color: var(--link-color);
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px;
-    transition: color 0.3s;
-}
-
-.bottom-nav a i {
-    font-size: clamp(1.2em, 3vw, 1.5em);
-}
-
-.bottom-nav a span {
-    font-size: clamp(0.7em, 2vw, 0.9em);
-    margin-top: 2px;
-    display: none;
-}
-
-.bottom-nav a:hover,
-.bottom-nav a.active {
-    color: var(--primary-color);
-}
-
-/* Estilos para o menu lateral */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: -250px;
-    width: 250px;
-    height: 100%;
-    background-color: var(--input-bg);
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-    transition: left 0.3s ease;
-    z-index: 950; /* Entre o header e o sidebar-toggle */
-}
-
-.sidebar.open {
-    left: 0;
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 20px;
-    margin-top: 0; /* Sem espaço extra no topo */
-}
-
-.sidebar li {
-    margin-bottom: 15px;
-}
-
-.sidebar a {
-    color: var(--text-color);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    transition: background-color 0.3s;
-}
-
-.sidebar a i {
-    font-size: clamp(1em, 2.5vw, 1.2em);
-}
-
-.sidebar a:hover {
-    background-color: var(--hover-color);
-    color: var(--primary-color);
-}
-
-/* Botão para abrir/fechar o menu lateral */
-.sidebar-toggle {
-    background: none;
-    border: none;
-    color: var(--link-color);
-    font-size: clamp(1.2em, 3vw, 1.5em);
-    cursor: pointer;
-    padding: 10px;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1001; /* Acima do header e do sidebar */
-}
-
-/* Estilos para a lista de moradores */
-.moradores-list {
-    list-style: none;
-    padding: 0;
-}
-
-.moradores-list li {
-    background-color: var(--input-bg);
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.moradores-list li:hover {
-    background-color: var(--input-focus);
-}
-
-.morador-name {
-    cursor: pointer;
-    font-size: clamp(1em, 2.5vw, 1.2em);
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.morador-name i {
-    font-size: clamp(0.9em, 2vw, 1em);
-}
-
-.morador-details {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #3a3a3a;
-    border-radius: 4px;
-    font-size: clamp(0.8em, 2vw, 0.9em);
-}
-
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
-        padding: clamp(5px, 1vw, 10px);
-        flex-wrap: wrap;
-        justify-content: space-between;
+        padding: 0.75rem;
     }
 
-    .logo {
-        flex-grow: 1;
-        text-align: left;
-        margin-left: 40px; /* Mantém o espaço para o botão */
+    .sidebar {
+        width: 220px;
+        left: -220px;
     }
 
-    .menu {
-        flex-direction: row;
-        gap: clamp(5px, 1vw, 10px);
-        justify-content: flex-end;
-        margin-top: 0;
+    .sidebar.open {
+        left: 0;
     }
 
-    .menu li {
-        margin-left: 0;
+    .hero {
+        padding: 20px 10px;
     }
 
-    .menu a {
-        padding: clamp(0.3rem, 1vw, 0.5rem);
+    .animate-text {
+        font-size: 1.8em;
     }
 
-    .content {
-        flex-direction: column;
-        padding: 10px;
+    .comunicados,
+    .features,
+    .anuncios-page .content,
+    .moradores-page .content {
+        padding: 15px;
+    }
+
+    .comunicados h2,
+    .moradores-table-container h2,
+    .servicos-list-container h2,
+    .feedbacks-list-container h2,
+    .correspondencias-list-container h2,
+    .veiculos-list-container h2,
+    .emergencias-list-container h2,
+    .anuncios-list-container h2,
+    .forum-list-container h2 {
+        font-size: 1.4em;
+    }
+
+    .features {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
 
     .form-container,
-    .reservas-list,
-    .content-container,
-    .avisos-list,
-    .mensagens-list,
-    .anuncios-list-container {
-        min-width: 100%;
+    .login-form,
+    .anuncios-list-container,
+    .moradores-table-container,
+    .servicos-list-container,
+    .feedbacks-list-container,
+    .correspondencias-list-container,
+    .veiculos-list-container,
+    .emergencias-list-container,
+    .forum-list-container {
+        max-width: 100%;
         margin: 10px 0;
     }
 
-    .comunicados {
-        padding: 10px;
-    }
-
-    .avisos, .mensagens {
-        padding: 10px;
-    }
-
-    .status-form {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-
-    .status-form select,
-    .status-form button {
-        width: 100%;
-    }
-
-    .moradores-table {
+    .moradores-table,
+    .servicos-list,
+    .feedbacks-list,
+    .correspondencias-list,
+    .veiculos-list,
+    .emergencias-list,
+    .anuncios-list,
+    .forum-list {
         display: block;
         overflow-x: auto;
-        width: 100%;
     }
 
     .moradores-table th,
     .moradores-table td {
-        min-width: 100px;
-        padding: clamp(5px, 1vw, 8px);
-    }
-
-    .moradores-table .edit-form {
-        display: block;
-    }
-
-    .edit-form input[type="text"],
-    .edit-form input[type="email"] {
-        margin-bottom: 5px;
-    }
-
-    .modal-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .anuncios-list li {
-        padding: 10px;
-    }
-
-    .anuncio-imagem {
-        max-height: 150px;
-    }
-
-    .image-modal-content {
-        max-width: 90%;
-    }
-
-    .modal-image {
-        max-height: 50vh;
-    }
-
-    .bottom-nav a span {
-        display: block;
+        min-width: 120px;
     }
 }
 
 @media screen and (max-width: 480px) {
-    .navbar {
-        padding: 5px;
+    .logo {
+        font-size: 1.2em;
     }
 
-    .menu {
-        gap: 5px;
-        justify-content: space-around;
+    .user-info span {
+        font-size: 0.9em;
     }
 
-    .menu a {
-        padding: clamp(0.2rem, 0.8vw, 0.3rem) clamp(0.3rem, 1vw, 0.5rem);
+    .logout-icon {
+        font-size: 1.2em;
     }
 
-    .login-form, .form-container {
-        padding: 15px;
+    .sidebar-toggle {
+        font-size: 1.5rem;
     }
 
-    .avisos li, .mensagens li {
-        padding: 8px;
+    .sidebar ul li a {
+        font-size: 1rem;
     }
 
-    .moradores-table th,
-    .moradores-table td {
-        padding: clamp(3px, 1vw, 5px);
-        font-size: clamp(0.7em, 1.8vw, 0.8em);
+    .sidebar ul li a i {
+        font-size: 1.1em;
     }
 
-    .btn-edit, .btn-delete {
-        padding: clamp(2px, 0.8vw, 3px) clamp(4px, 1vw, 5px);
-        font-size: clamp(0.6em, 1.8vw, 0.8em);
+    .animate-text {
+        font-size: 1.5em;
     }
 
-    .edit-form {
-        padding: 5px;
+    .form-container,
+    .login-form {
+        padding: 20px;
+        max-width: 320px;
     }
 
-    .anuncios-categoria h3 {
-        font-size: clamp(1em, 2.5vw, 1.2em);
+    .form-group label {
+        font-size: 0.9em;
     }
 
-    .anuncios-list li {
-        padding: 8px;
-        font-size: clamp(0.7em, 1.8vw, 0.8em);
-    }
-
-    .anuncio-imagem {
-        max-height: 100px;
-    }
-
-    .image-modal-content {
+    .login-form input[type="text"],
+    .login-form input[type="email"],
+    .login-form input[type="password"],
+    .form-container input[type="text"],
+    .form-container input[type="email"],
+    .form-container input[type="password"],
+    .form-container input[type="number"],
+    .form-container select,
+    .form-container textarea {
         padding: 10px;
+        font-size: 0.9em;
     }
 
-    .modal-image {
-        max-height: 40vh;
+    .btn-login,
+    .form-container input[type="submit"] {
+        padding: 10px 20px;
+        font-size: 0.9em;
     }
 
-    .modal-details {
-        font-size: clamp(0.8em, 2vw, 0.9em);
-    }
-
-    .bottom-nav a i {
-        font-size: clamp(1em, 2.5vw, 1.2em);
-    }
-
-    .bottom-nav a span {
-        font-size: clamp(0.6em, 1.8vw, 0.8em);
-    }
-
-    .sidebar {
-        width: 200px;
+    .flash-messages {
+        font-size: 0.9em;
+        padding: 8px;
     }
 }
