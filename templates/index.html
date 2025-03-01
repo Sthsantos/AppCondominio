@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
     <script>
-        // Configuração do Firebase para appcondominio-2fcac
         const firebaseConfig = {
             apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
             authDomain: "appcondominio-2fcac.firebaseapp.com",
@@ -20,16 +19,12 @@
             measurementId: "G-SN7T6D7FTE"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
 
-        // Função para registrar o token FCM
         function registerPush() {
             messaging.requestPermission()
-                .then(() => {
-                    return messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }); // Substitua pela chave VAPID
-                })
+                .then(() => messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }))
                 .then((token) => {
                     console.log('Token FCM:', token);
                     fetch('/register_token', {
@@ -40,28 +35,26 @@
                       .then(text => console.log('Token registrado:', text))
                       .catch(err => console.error('Erro ao enviar token:', err));
                 })
-                .catch((err) => {
-                    console.error('Erro ao registrar push:', err);
-                });
+                .catch((err) => console.error('Erro ao registrar push:', err));
         }
 
-        // Receber notificações em foreground
         messaging.onMessage((payload) => {
             console.log('Notificação recebida em foreground:', payload);
-            alert(payload.notification.body); // Exemplo simples de exibição
+            const notification = new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/static/icon.png'
+            });
         });
 
-        // Registrar o Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/static/sw.js')
                 .then((reg) => {
                     console.log('Service Worker registrado', reg);
-                    registerPush(); // Registrar o token após o Service Worker estar pronto
+                    registerPush();
                 })
                 .catch((err) => console.error('Erro ao registrar Service Worker', err));
         }
 
-        // Função para abrir/fechar o menu lateral
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
@@ -69,22 +62,35 @@
     </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Residencial Costa Verde</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -96,69 +102,64 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main>
         <section class="hero">
-            {% if usuario %}
-                <h1 class="animate-text">Bem-vindo, {{ usuario['nome'] }}!</h1>
-            {% else %}
-                <h1 class="animate-text">Bem-vindo ao Sistema de Administração</h1>
-            {% endif %}
+            <h1 class="animate-text">
+                {% if usuario %}
+                    Bem-vindo, {{ usuario['nome'] }}!
+                {% else %}
+                    Bem-vindo ao Sistema!
+                {% endif %}
+            </h1>
         </section>
 
-        <!-- Seção para avisos -->
+        <!-- Comunicados -->
         <section class="comunicados">
             <h2>Comunicados</h2>
-
-            <!-- Avisos Gerais -->
             <div class="avisos">
-                <h3>Avisos Gerais</h3>
                 {% if avisos|length > 0 %}
                     <ul>
-                        {% for aviso in avisos %}
+                        {% for aviso in avisos|slice(0, 3) %}
                             <li>
                                 <strong>{{ aviso['titulo'] }}</strong> - {{ aviso['data_envio'] }}<br>
-                                <p>{{ aviso['mensagem'] }}</p>
+                                <p>{{ aviso['mensagem']|truncate(100) }}</p>
                             </li>
                         {% endfor %}
                     </ul>
+                    {% if avisos|length > 3 %}
+                        <a href="{{ url_for('comunicacao') }}" class="see-more">Ver mais</a>
+                    {% endif %}
                 {% else %}
-                    <p>Nenhum aviso geral no momento.</p>
+                    <p>Nenhum aviso no momento.</p>
                 {% endif %}
             </div>
         </section>
 
+        <!-- Recursos Rápidos -->
         <section class="features">
-            <!-- Apenas os itens solicitados na tela inicial -->
+            <a href="{{ url_for('reservas') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-calendar-alt feature-icon"></i>
+                    <h3>Reservas</h3>
+                </div>
+            </a>
             <a href="{{ url_for('moradores') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-users feature-icon"></i>
                     <h3>Moradores</h3>
-                    {% if moradores|length > 0 %}
-                        <p>{{ moradores|length }} moradores cadastrados</p>
-                    {% else %}
-                        <p>Nenhum morador cadastrado no momento</p>
-                    {% endif %}
                 </div>
             </a>
             <a href="{{ url_for('forum') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-comment-dots feature-icon"></i>
                     <h3>Fórum</h3>
-                    <p>Participe de discussões da comunidade.</p>
-                </div>
-            </a>
-            <a href="{{ url_for('feedback') }}" class="feature-link">
-                <div class="feature">
-                    <i class="fas fa-comments feature-icon"></i>
-                    <h3>Feedback</h3>
-                    <p>Envie seus feedbacks e sugestões.</p>
                 </div>
             </a>
             <a href="{{ url_for('correspondencias') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-envelope feature-icon"></i>
                     <h3>Correspondências</h3>
-                    <p>Acompanhe a entrega de suas correspondências.</p>
                 </div>
             </a>
         </section>
@@ -178,7 +179,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
