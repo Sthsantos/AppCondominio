@@ -3,28 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensagens - Painel de Administração de Condomínios</title>
+    <title>Mensagens - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -36,35 +54,37 @@
         </ul>
     </nav>
 
-    <main>
+    <!-- Conteúdo Principal -->
+    <main class="mensagens-page">
         <section class="hero">
             <h1 class="animate-text">Mensagens Pessoais</h1>
         </section>
-
-        <section class="comunicados">
-            <h2>Suas Mensagens</h2>
-            <div class="mensagens">
-                {% if mensagens|length > 0 %}
-                    <ul>
-                        {% for mensagem in mensagens %}
-                            <li>
-                                <strong>{{ mensagem['titulo'] }}</strong> - {{ mensagem['data_envio'] }}<br>
-                                <p>{{ mensagem['mensagem'] }}</p>
-                                {% if session.get('tipo_usuario') == 'admin' %}
-                                    <form method="POST" action="{{ url_for('delete_mensagem', mensagem_id=mensagem['id']) }}" style="display: inline;">
-                                        <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">
-                                            <i class="fas fa-trash"></i> Excluir
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>Nenhuma mensagem pessoal no momento.</p>
-                {% endif %}
+        <div class="content">
+            <div class="mensagens-list-container">
+                <h2>Suas Mensagens</h2>
+                <div class="mensagens">
+                    {% if mensagens|length > 0 %}
+                        <ul class="mensagens-list">
+                            {% for mensagem in mensagens %}
+                                <li>
+                                    <strong>{{ mensagem['titulo'] }}</strong> - {{ mensagem['data_envio'] }}<br>
+                                    <p>{{ mensagem['mensagem'] }}</p>
+                                    {% if session.get('tipo_usuario') == 'admin' %}
+                                        <form method="POST" action="{{ url_for('delete_mensagem', mensagem_id=mensagem['id']) }}" style="display: inline;">
+                                            <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir esta mensagem?');">
+                                                <i class="fas fa-trash"></i> Excluir
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-data">Nenhuma mensagem pessoal no momento.</p>
+                    {% endif %}
+                </div>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Barra Inferior -->
