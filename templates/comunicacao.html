@@ -6,7 +6,6 @@
     <title>Comunicação - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <script>
         function toggleDestinatario() {
             const tipo = document.getElementById('tipo_comunicacao').value;
@@ -30,7 +29,7 @@
         function showDeleteModal(id, type) {
             const modal = document.getElementById('delete-modal');
             const form = document.getElementById('delete-form-' + type + '-' + id);
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
             modal.querySelector('.confirm-delete').onclick = function() {
                 form.submit();
             };
@@ -58,18 +57,26 @@
     </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
@@ -78,6 +85,7 @@
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -89,167 +97,197 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="comunicacao-page">
-        <section class="hero">
-            <h1 class="animate-text">Comunicação</h1>
-        </section>
-        <section class="content">
-            <div class="form-container">
-                <h2>Enviar Comunicado</h2>
-                <form method="POST" action="{{ url_for('comunicacao') }}">
-                    <label for="tipo_comunicacao">Tipo de Comunicação:</label>
-                    <select id="tipo_comunicacao" name="tipo_comunicacao" onchange="toggleDestinatario()" required>
-                        <option value="geral">Aviso Geral</option>
-                        <option value="especifico">Mensagem Específica</option>
-                    </select>
-
-                    <div id="destinatario_div" style="display: none;">
-                        <label for="destinatario_id">Destinatário:</label>
-                        <select id="destinatario_id" name="destinatario_id">
-                            {% for usuario in usuarios %}
-                                <option value="{{ usuario['id'] }}">{{ usuario['nome'] }}</option>
-                            {% endfor %}
-                        </select>
+        {% if session.get('tipo_usuario') == 'admin' %}
+            <section class="hero">
+                <h1 class="animate-text">Comunicação</h1>
+            </section>
+            <section class="content">
+                <div class="form-container">
+                    <h2>Enviar Comunicado</h2>
+                    <form method="POST" action="{{ url_for('comunicacao') }}">
                         <div class="form-group">
-                            <label for="is_correspondencia">
-                                <input type="checkbox" id="is_correspondencia" name="is_correspondencia" onchange="toggleCorrespondencia()"> Relacionado a Correspondência
-                            </label>
-                        </div>
-                        <div id="tipo_correspondencia_div" style="display: none;">
-                            <label for="tipo_correspondencia">Tipo de Correspondência:</label>
-                            <select name="tipo_correspondencia" id="tipo_correspondencia">
-                                <option value="Carta">Carta</option>
-                                <option value="Encomenda">Encomenda</option>
-                                <option value="Outro">Outro</option>
+                            <label for="tipo_comunicacao"><i class="fas fa-comment"></i> Tipo de Comunicação:</label>
+                            <select id="tipo_comunicacao" name="tipo_comunicacao" onchange="toggleDestinatario()" required>
+                                <option value="geral">Aviso Geral</option>
+                                <option value="especifico">Mensagem Específica</option>
                             </select>
                         </div>
-                    </div>
 
-                    <label for="titulo">Título:</label>
-                    <input type="text" id="titulo" name="titulo" required>
+                        <div id="destinatario_div" style="display: none;">
+                            <div class="form-group">
+                                <label for="destinatario_id"><i class="fas fa-user"></i> Destinatário:</label>
+                                <select id="destinatario_id" name="destinatario_id">
+                                    {% for usuario in usuarios %}
+                                        <option value="{{ usuario['id'] }}">{{ usuario['nome'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="is_correspondencia">
+                                    <input type="checkbox" id="is_correspondencia" name="is_correspondencia" onchange="toggleCorrespondencia()"> <i class="fas fa-envelope"></i> Relacionado a Correspondência
+                                </label>
+                            </div>
+                            <div id="tipo_correspondencia_div" style="display: none;">
+                                <label for="tipo_correspondencia"><i class="fas fa-box"></i> Tipo de Correspondência:</label>
+                                <select name="tipo_correspondencia" id="tipo_correspondencia">
+                                    <option value="Carta">Carta</option>
+                                    <option value="Encomenda">Encomenda</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <label for="mensagem">Mensagem:</label>
-                    <textarea id="mensagem" name="mensagem" required></textarea>
+                        <div class="form-group">
+                            <label for="titulo"><i class="fas fa-heading"></i> Título:</label>
+                            <input type="text" id="titulo" name="titulo" required placeholder="Digite o título">
+                        </div>
 
-                    <input type="submit" value="Enviar">
-                </form>
+                        <div class="form-group">
+                            <label for="mensagem"><i class="fas fa-comment-alt"></i> Mensagem:</label>
+                            <textarea id="mensagem" name="mensagem" required placeholder="Digite a mensagem"></textarea>
+                        </div>
 
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <ul class="flash-messages">
-                            {% for message in messages %}
-                                <li>{{ message }}</li>
+                        <input type="submit" value="Enviar" class="btn-login">
+                    </form>
+
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for message in messages %}
+                                    <p>{{ message }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="avisos-list">
+                    <h2>Avisos Gerais Enviados</h2>
+                    {% if avisos|length > 0 %}
+                        <ul>
+                            {% for aviso in avisos %}
+                                <li>
+                                    <strong>{{ aviso['titulo'] }}</strong> - {{ aviso['data_envio'] }}<br>
+                                    {{ aviso['mensagem'] }}
+                                    <div class="aviso-actions">
+                                        <button onclick="toggleEditForm({{ aviso['id'] }}, 'aviso')" class="btn-edit">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button onclick="showDeleteModal({{ aviso['id'] }}, 'aviso')" class="btn-delete">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                        <form id="delete-form-aviso-{{ aviso['id'] }}" method="POST" action="{{ url_for('delete_aviso', aviso_id=aviso['id']) }}" style="display: none;"></form>
+                                    </div>
+                                    <div id="edit-form-aviso-{{ aviso['id'] }}" class="edit-form" style="display: none;">
+                                        <form method="POST" action="{{ url_for('edit_aviso', aviso_id=aviso['id']) }}">
+                                            <div class="form-group">
+                                                <label for="edit_titulo_{{ aviso['id'] }}"><i class="fas fa-heading"></i> Título:</label>
+                                                <input type="text" id="edit_titulo_{{ aviso['id'] }}" name="titulo" value="{{ aviso['titulo'] }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_mensagem_{{ aviso['id'] }}"><i class="fas fa-comment-alt"></i> Mensagem:</label>
+                                                <textarea id="edit_mensagem_{{ aviso['id'] }}" name="mensagem" required>{{ aviso['mensagem'] }}</textarea>
+                                            </div>
+                                            <input type="submit" value="Salvar Alterações" class="btn-login">
+                                        </form>
+                                    </div>
+                                </li>
                             {% endfor %}
                         </ul>
-                    {% endif %}
-                {% endwith %}
-            </div>
-            <div class="avisos-list">
-                <h2>Avisos Gerais Enviados</h2>
-                {% if avisos|length > 0 %}
-                    <ul>
-                        {% for aviso in avisos %}
-                            <li>
-                                <strong>{{ aviso['titulo'] }}</strong> - {{ aviso['data_envio'] }}<br>
-                                {{ aviso['mensagem'] }}
-                                <div class="aviso-actions">
-                                    <button onclick="toggleEditForm({{ aviso['id'] }}, 'aviso')" class="btn-edit">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                    <button onclick="showDeleteModal({{ aviso['id'] }}, 'aviso')" class="btn-delete">
-                                        <i class="fas fa-trash"></i> Excluir
-                                    </button>
-                                    <form id="delete-form-aviso-{{ aviso['id'] }}" method="POST" action="{{ url_for('delete_aviso', aviso_id=aviso['id']) }}" style="display: none;"></form>
-                                </div>
-                                <div id="edit-form-aviso-{{ aviso['id'] }}" class="edit-form" style="display: none;">
-                                    <form method="POST" action="{{ url_for('edit_aviso', aviso_id=aviso['id']) }}">
-                                        <label for="edit_titulo_{{ aviso['id'] }}">Título:</label>
-                                        <input type="text" id="edit_titulo_{{ aviso['id'] }}" name="titulo" value="{{ aviso['titulo'] }}" required>
-                                        <label for="edit_mensagem_{{ aviso['id'] }}">Mensagem:</label>
-                                        <textarea id="edit_mensagem_{{ aviso['id'] }}" name="mensagem" required>{{ aviso['mensagem'] }}</textarea>
-                                        <input type="submit" value="Salvar Alterações">
-                                    </form>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="no-data">Nenhum aviso geral enviado ainda.</p>
-                {% endif %}
-            </div>
-            <div class="mensagens-list">
-                <h2>Mensagens Específicas Enviadas</h2>
-                {% if mensagens_enviadas|length > 0 %}
-                    <ul>
-                        {% for mensagem in mensagens_enviadas %}
-                            <li>
-                                <strong>{{ mensagem['titulo'] }}</strong> - Para: {{ mensagem['destinatario_nome'] }} - {{ mensagem['data_envio'] }}<br>
-                                {{ mensagem['mensagem'] }}<br>
-                                <strong>Status:</strong> {{ mensagem['status'] }} 
-                                {% if mensagem['data_lida'] %} - Lida em: {{ mensagem['data_lida'] }}{% endif %}
-                                <div class="aviso-actions">
-                                    <button onclick="toggleEditForm({{ mensagem['id'] }}, 'mensagem')" class="btn-edit">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                    <button onclick="showDeleteModal({{ mensagem['id'] }}, 'mensagem')" class="btn-delete">
-                                        <i class="fas fa-trash"></i> Excluir
-                                    </button>
-                                    <form id="delete-form-mensagem-{{ mensagem['id'] }}" method="POST" action="{{ url_for('comunicacao') }}" style="display: none;">
-                                        <input type="hidden" name="delete_mensagem_id" value="{{ mensagem['id'] }}">
-                                    </form>
-                                </div>
-                                <div id="edit-form-mensagem-{{ mensagem['id'] }}" class="edit-form" style="display: none;">
-                                    <form method="POST" action="{{ url_for('comunicacao') }}">
-                                        <input type="hidden" name="edit_mensagem_id" value="{{ mensagem['id'] }}">
-                                        <label for="edit_titulo_{{ mensagem['id'] }}">Título:</label>
-                                        <input type="text" id="edit_titulo_{{ mensagem['id'] }}" name="titulo" value="{{ mensagem['titulo'] }}" required>
-                                        <label for="edit_mensagem_{{ mensagem['id'] }}">Mensagem:</label>
-                                        <textarea id="edit_mensagem_{{ mensagem['id'] }}" name="mensagem" required>{{ mensagem['mensagem'] }}</textarea>
-                                        <input type="submit" value="Salvar Alterações">
-                                    </form>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="no-data">Nenhuma mensagem específica enviada ainda.</p>
-                {% endif %}
-            </div>
-            <div class="correspondencias-list-container">
-                <h2>Correspondências Recebidas (Não Entregues)</h2>
-                <ul class="correspondencias-list">
-                    {% if correspondencias|selectattr('status', 'equalto', 'Recebida')|list|length > 0 %}
-                        {% for correspondencia in correspondencias if correspondencia['status'] == 'Recebida' %}
-                            <li>
-                                <strong>Destinatário:</strong> {{ correspondencia['usuario_nome'] }}<br>
-                                <strong>Tipo:</strong> {{ correspondencia['tipo'] }}<br>
-                                <strong>Descrição:</strong> {{ correspondencia['descricao'] }}<br>
-                                <strong>Data de Recebimento:</strong> {{ correspondencia['data_recebimento'] }}<br>
-                                <strong>Status:</strong> {{ correspondencia['status'] }}<br>
-                                <form method="POST" action="{{ url_for('comunicacao') }}" class="status-form">
-                                    <input type="hidden" name="correspondencia_id" value="{{ correspondencia['id'] }}">
-                                    <input type="hidden" name="status" value="Entregue">
-                                    <button type="submit">Dar Baixa (Entregue)</button>
-                                </form>
-                            </li>
-                        {% endfor %}
                     {% else %}
-                        <li class="no-data">Nenhuma correspondência recebida pendente.</li>
+                        <p class="no-data">Nenhum aviso geral enviado ainda.</p>
                     {% endif %}
-                </ul>
-            </div>
-        </section>
-        <!-- Modal de Confirmação de Exclusão -->
-        <div id="delete-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Confirmar Exclusão</h3>
-                <p>Tem certeza que deseja excluir este item?</p>
-                <div class="modal-actions">
-                    <button class="confirm-delete">Sim, Excluir</button>
-                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+                </div>
+
+                <div class="mensagens-list">
+                    <h2>Mensagens Específicas Enviadas</h2>
+                    {% if mensagens_enviadas|length > 0 %}
+                        <ul>
+                            {% for mensagem in mensagens_enviadas %}
+                                <li>
+                                    <strong>{{ mensagem['titulo'] }}</strong> - Para: {{ mensagem['destinatario_nome'] }} - {{ mensagem['data_envio'] }}<br>
+                                    {{ mensagem['mensagem'] }}<br>
+                                    <strong>Status:</strong> {{ mensagem['status'] }} 
+                                    {% if mensagem['data_lida'] %} - Lida em: {{ mensagem['data_lida'] }}{% endif %}
+                                    <div class="aviso-actions">
+                                        <button onclick="toggleEditForm({{ mensagem['id'] }}, 'mensagem')" class="btn-edit">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button onclick="showDeleteModal({{ mensagem['id'] }}, 'mensagem')" class="btn-delete">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                        <form id="delete-form-mensagem-{{ mensagem['id'] }}" method="POST" action="{{ url_for('comunicacao') }}" style="display: none;">
+                                            <input type="hidden" name="delete_mensagem_id" value="{{ mensagem['id'] }}">
+                                        </form>
+                                    </div>
+                                    <div id="edit-form-mensagem-{{ mensagem['id'] }}" class="edit-form" style="display: none;">
+                                        <form method="POST" action="{{ url_for('comunicacao') }}">
+                                            <input type="hidden" name="edit_mensagem_id" value="{{ mensagem['id'] }}">
+                                            <div class="form-group">
+                                                <label for="edit_titulo_{{ mensagem['id'] }}"><i class="fas fa-heading"></i> Título:</label>
+                                                <input type="text" id="edit_titulo_{{ mensagem['id'] }}" name="titulo" value="{{ mensagem['titulo'] }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_mensagem_{{ mensagem['id'] }}"><i class="fas fa-comment-alt"></i> Mensagem:</label>
+                                                <textarea id="edit_mensagem_{{ mensagem['id'] }}" name="mensagem" required>{{ mensagem['mensagem'] }}</textarea>
+                                            </div>
+                                            <input type="submit" value="Salvar Alterações" class="btn-login">
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-data">Nenhuma mensagem específica enviada ainda.</p>
+                    {% endif %}
+                </div>
+
+                <div class="correspondencias-list-container">
+                    <h2>Correspondências Recebidas (Não Entregues)</h2>
+                    <ul class="correspondencias-list">
+                        {% if correspondencias|selectattr('status', 'equalto', 'Recebida')|list|length > 0 %}
+                            {% for correspondencia in correspondencias if correspondencia['status'] == 'Recebida' %}
+                                <li>
+                                    <strong>Destinatário:</strong> {{ correspondencia['usuario_nome'] }}<br>
+                                    <strong>Tipo:</strong> {{ correspondencia['tipo'] }}<br>
+                                    <strong>Descrição:</strong> {{ correspondencia['descricao'] }}<br>
+                                    <strong>Data de Recebimento:</strong> {{ correspondencia['data_recebimento'] }}<br>
+                                    <strong>Status:</strong> {{ correspondencia['status'] }}<br>
+                                    <form method="POST" action="{{ url_for('comunicacao') }}" class="status-form">
+                                        <input type="hidden" name="correspondencia_id" value="{{ correspondencia['id'] }}">
+                                        <input type="hidden" name="status" value="Entregue">
+                                        <button type="submit" class="btn-login">Dar Baixa (Entregue)</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="no-data">Nenhuma correspondência recebida pendente.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Modal de Confirmação de Exclusão -->
+            <div id="delete-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3>Confirmar Exclusão</h3>
+                    <p>Tem certeza que deseja excluir este item?</p>
+                    <div class="modal-actions">
+                        <button class="confirm-delete">Sim, Excluir</button>
+                        <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <section class="hero">
+                <h1 class="animate-text">Acesso Negado</h1>
+            </section>
+            <div class="content">
+                <p class="no-data">Esta página é restrita a administradores.</p>
+            </div>
+        {% endif %}
     </main>
 
     <!-- Barra Inferior -->
@@ -266,7 +304,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
