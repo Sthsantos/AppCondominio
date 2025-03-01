@@ -17,8 +17,7 @@
         }
 
         function hideDeleteModal() {
-            const modal = document.getElementById('delete-modal');
-            modal.style.display = 'none';
+            document.getElementById('delete-modal').style.display = 'none';
         }
 
         function showImageModal(anuncioId) {
@@ -56,18 +55,26 @@
     </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
@@ -76,6 +83,7 @@
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -87,6 +95,7 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="anuncios-page">
         <section class="hero">
             <h1 class="animate-text">Anúncios</h1>
@@ -96,7 +105,7 @@
                 <h2>Criar Novo Anúncio</h2>
                 <form method="POST" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="tipo">Categoria:</label>
+                        <label for="tipo"><i class="fas fa-list"></i> Categoria:</label>
                         <select name="tipo" id="tipo" required>
                             <option value="Venda">Venda</option>
                             <option value="Compra">Compra</option>
@@ -106,26 +115,26 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="titulo">Título:</label>
-                        <input type="text" name="titulo" id="titulo" required placeholder="Ex.: 'Vendo bicicleta' ou 'Procuro eletricista'">
+                        <label for="titulo"><i class="fas fa-heading"></i> Título:</label>
+                        <input type="text" name="titulo" id="titulo" required placeholder="Ex.: 'Vendo bicicleta'">
                     </div>
                     <div class="form-group">
-                        <label for="descricao">Descrição:</label>
+                        <label for="descricao"><i class="fas fa-comment"></i> Descrição:</label>
                         <textarea name="descricao" id="descricao" required placeholder="Descreva seu anúncio aqui"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="imagem">Imagem (cartão, logotipo, etc.):</label>
+                        <label for="imagem"><i class="fas fa-image"></i> Imagem:</label>
                         <input type="file" name="imagem" id="imagem" accept="image/*">
                     </div>
-                    <input type="submit" value="Publicar Anúncio">
+                    <input type="submit" value="Publicar Anúncio" class="btn-login">
                 </form>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
-                        <ul class="flash-messages">
+                        <div class="flash-messages">
                             {% for message in messages %}
-                                <li>{{ message }}</li>
+                                <p>{{ message }}</p>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% endif %}
                 {% endwith %}
             </div>
@@ -165,6 +174,7 @@
                 {% endfor %}
             </div>
         </section>
+
         <!-- Modal de Confirmação de Exclusão -->
         <div id="delete-modal" class="modal" style="display: none;">
             <div class="modal-content">
@@ -176,6 +186,7 @@
                 </div>
             </div>
         </div>
+
         <!-- Modal de Visualização de Imagem -->
         <div id="image-modal" class="modal" style="display: none;">
             <div class="modal-content image-modal-content">
@@ -200,7 +211,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
