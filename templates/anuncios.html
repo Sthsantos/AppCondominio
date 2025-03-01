@@ -7,47 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
-        function showDeleteModal(anuncioId) {
-            const modal = document.getElementById('delete-modal');
-            const form = document.getElementById('delete-form-' + anuncioId);
-            modal.style.display = 'block';
-            modal.querySelector('.confirm-delete').onclick = function() {
-                form.submit();
-            };
-        }
-
-        function hideDeleteModal() {
-            document.getElementById('delete-modal').style.display = 'none';
-        }
-
-        function showImageModal(anuncioId) {
-            const modal = document.getElementById('image-modal');
-            const img = document.getElementById('modal-image');
-            const details = document.getElementById('modal-details');
-            const anuncio = document.querySelector(`[data-anuncio-id="${anuncioId}"]`);
-
-            const imgSrc = anuncio.querySelector('.anuncio-imagem').src;
-            const usuario = anuncio.querySelector('.usuario-nome').textContent;
-            const tipo = anuncio.querySelector('.anuncio-tipo').textContent;
-            const titulo = anuncio.querySelector('.anuncio-titulo').textContent;
-            const descricao = anuncio.querySelector('.anuncio-descricao').textContent;
-            const data = anuncio.querySelector('.anuncio-data').textContent;
-
-            img.src = imgSrc;
-            details.innerHTML = `
-                <strong>Usuário:</strong> ${usuario}<br>
-                <strong>Tipo:</strong> ${tipo}<br>
-                <strong>Título:</strong> ${titulo}<br>
-                <strong>Descrição:</strong> ${descricao}<br>
-                <strong>Data:</strong> ${data}
-            `;
-            modal.style.display = 'block';
-        }
-
-        function hideImageModal() {
-            document.getElementById('image-modal').style.display = 'none';
-        }
-
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
@@ -80,6 +39,7 @@
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
             <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('mensagens') }}"><i class="fas fa-envelope"></i> Mensagens</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
@@ -100,31 +60,22 @@
         <section class="hero">
             <h1 class="animate-text">Anúncios</h1>
         </section>
-        <section class="content">
+        <div class="content">
             <div class="form-container">
                 <h2>Criar Novo Anúncio</h2>
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" action="{{ url_for('anuncios') }}">
                     <div class="form-group">
-                        <label for="tipo"><i class="fas fa-list"></i> Categoria:</label>
+                        <label for="tipo"><i class="fas fa-tag"></i> Tipo:</label>
                         <select name="tipo" id="tipo" required>
                             <option value="Venda">Venda</option>
-                            <option value="Compra">Compra</option>
-                            <option value="Aluguel">Aluguel</option>
-                            <option value="Serviços">Serviços</option>
-                            <option value="Outros">Outros</option>
+                            <option value="Troca">Troca</option>
+                            <option value="Doação">Doação</option>
+                            <option value="Serviço">Serviço</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="titulo"><i class="fas fa-heading"></i> Título:</label>
-                        <input type="text" name="titulo" id="titulo" required placeholder="Ex.: 'Vendo bicicleta'">
-                    </div>
-                    <div class="form-group">
-                        <label for="descricao"><i class="fas fa-comment"></i> Descrição:</label>
-                        <textarea name="descricao" id="descricao" required placeholder="Descreva seu anúncio aqui"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="imagem"><i class="fas fa-image"></i> Imagem:</label>
-                        <input type="file" name="imagem" id="imagem" accept="image/*">
+                        <label for="descricao"><i class="fas fa-comment-alt"></i> Descrição:</label>
+                        <textarea name="descricao" id="descricao" required placeholder="Digite a descrição do anúncio"></textarea>
                     </div>
                     <input type="submit" value="Publicar Anúncio" class="btn-login">
                 </form>
@@ -139,60 +90,27 @@
                 {% endwith %}
             </div>
             <div class="anuncios-list-container">
-                <h2>Mural de Anúncios</h2>
-                {% for categoria in ['Venda', 'Compra', 'Aluguel', 'Serviços', 'Outros'] %}
-                    <div class="anuncios-categoria">
-                        <h3>{{ categoria }}</h3>
-                        {% set anuncios_categoria = anuncios | selectattr('tipo', 'equalto', categoria) | list %}
-                        {% if anuncios_categoria|length > 0 %}
-                            <ul class="anuncios-list">
-                                {% for anuncio in anuncios_categoria %}
-                                <li data-anuncio-id="{{ anuncio['id'] }}">
-                                    <span class="usuario-nome">{{ anuncio['usuario_nome'] }}</span><br>
-                                    <strong>Tipo:</strong> <span class="anuncio-tipo">{{ anuncio['tipo'] }}</span><br>
-                                    <strong>Título:</strong> <span class="anuncio-titulo">{{ anuncio['titulo'] }}</span><br>
-                                    <strong>Descrição:</strong> <span class="anuncio-descricao">{{ anuncio['descricao'] }}</span><br>
-                                    {% if anuncio['imagem'] %}
-                                        <img src="{{ url_for('static', filename='uploads/' + anuncio['imagem']) }}" alt="Imagem do Anúncio" class="anuncio-imagem" onclick="showImageModal({{ anuncio['id'] }})">
-                                    {% endif %}
-                                    <strong>Data:</strong> <span class="anuncio-data">{{ anuncio['data_criacao']|strftime('%d/%m/%Y %H:%M') }}</span><br>
-                                    {% if anuncio['usuario_id'] == session['user_id'] %}
-                                        <form method="POST" style="display: inline;" id="delete-form-{{ anuncio['id'] }}">
-                                            <input type="hidden" name="delete_anuncio_id" value="{{ anuncio['id'] }}">
-                                            <button type="button" class="btn-delete" onclick="showDeleteModal({{ anuncio['id'] }})">
-                                                <i class="fas fa-trash"></i> Excluir
-                                            </button>
-                                        </form>
-                                    {% endif %}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="no-data">Nenhum anúncio nesta categoria ainda.</p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <!-- Modal de Confirmação de Exclusão -->
-        <div id="delete-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Confirmação de Exclusão</h3>
-                <p>Tem certeza que deseja excluir este anúncio?</p>
-                <div class="modal-actions">
-                    <button class="confirm-delete">Sim</button>
-                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal de Visualização de Imagem -->
-        <div id="image-modal" class="modal" style="display: none;">
-            <div class="modal-content image-modal-content">
-                <img id="modal-image" src="" alt="Imagem Ampliada" class="modal-image">
-                <div id="modal-details" class="modal-details"></div>
-                <button onclick="hideImageModal()" class="cancel-modal">Fechar</button>
+                <h2>Anúncios Publicados</h2>
+                {% if anuncios|length > 0 %}
+                    <ul class="anuncios-list">
+                        {% for anuncio in anuncios %}
+                            <li>
+                                <strong>{{ anuncio['tipo'] }}</strong> - Por: {{ anuncio['usuario_nome'] }} - {{ anuncio['data_criacao'] }}<br>
+                                <p>{{ anuncio['descricao'] }}</p>
+                                {% if anuncio['usuario_id'] == session['user_id'] %}
+                                    <form method="POST" action="{{ url_for('anuncios') }}" style="display: inline;">
+                                        <input type="hidden" name="delete_anuncio_id" value="{{ anuncio['id'] }}">
+                                        <button type="submit" class="btn-delete" onclick="return confirm('Tem certeza que deseja excluir este anúncio?');">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="no-data">Nenhum anúncio publicado ainda.</p>
+                {% endif %}
             </div>
         </div>
     </main>
@@ -211,7 +129,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
