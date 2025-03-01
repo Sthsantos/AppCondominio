@@ -3,22 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios</title>
+    <title>Relatórios - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
-            <div class="logo"></div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
-                </ul>
-            </nav>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
+
+    <!-- Menu Lateral -->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
+            <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
+            {% if session.get('tipo_usuario') == 'admin' %}
+                <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
+                <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
+                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        </ul>
+    </nav>
+
+    <!-- Conteúdo Principal -->
     <main class="relatorios-page">
         <section class="hero">
             <h1 class="animate-text">Relatórios</h1>
@@ -26,31 +62,70 @@
         <div class="content">
             <div class="form-container">
                 <h2>Gerar Relatório</h2>
-                <form method="POST">
-                    <label for="tipo_relatorio">Tipo de Relatório:</label>
-                    <select id="tipo_relatorio" name="tipo_relatorio" required>
-                        <option value="reservas">Reservas</option>
-                        <option value="pagamentos">Pagamentos</option>
-                    </select>
-
-                    <label for="data_inicio">Data Início (YYYY-MM-DD):</label>
-                    <input type="date" id="data_inicio" name="data_inicio" required>
-
-                    <label for="data_fim">Data Fim (YYYY-MM-DD):</label>
-                    <input type="date" id="data_fim" name="data_fim" required>
-
-                    <input type="submit" value="Gerar Relatório">
+                <form method="POST" action="{{ url_for('relatorios') }}">
+                    <div class="form-group">
+                        <label for="tipo_relatorio"><i class="fas fa-chart-bar"></i> Tipo de Relatório:</label>
+                        <select id="tipo_relatorio" name="tipo_relatorio" required>
+                            <option value="reservas">Reservas</option>
+                            <option value="pagamentos">Pagamentos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_inicio"><i class="fas fa-calendar-alt"></i> Data Início:</label>
+                        <input type="date" id="data_inicio" name="data_inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_fim"><i class="fas fa-calendar-alt"></i> Data Fim:</label>
+                        <input type="date" id="data_fim" name="data_fim" required>
+                    </div>
+                    <input type="submit" value="Gerar Relatório" class="btn-login">
                 </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
             </div>
-            <div class="relatorios-list">
+            <div class="relatorios-list-container">
                 <h2>Relatórios Gerados</h2>
-                <ul>
-                {% for relatorio in relatorios %}
-                    <li>Tipo: {{ relatorio['tipo'] }} - Período: {{ relatorio['data_inicio'] }} a {{ relatorio['data_fim'] }}</li>
-                {% endfor %}
+                <ul class="relatorios-list">
+                    {% if relatorios|length > 0 %}
+                        {% for relatorio in relatorios %}
+                            <li>
+                                <strong>Tipo:</strong> {{ relatorio['tipo'] }}<br>
+                                <strong>Período:</strong> {{ relatorio['data_inicio'] }} a {{ relatorio['data_fim'] }}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="no-data">Nenhum relatório gerado ainda.</li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </main>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anúncios</span>
+        </a>
+        <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Reservas</span>
+        </a>
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Mensagens</span>
+        </a>
+    </nav>
 </body>
 </html>
