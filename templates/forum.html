@@ -6,82 +6,6 @@
     <title>Fórum - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        .forum-list li {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: var(--input-bg);
-            border-radius: 4px;
-        }
-        .respostas {
-            margin-top: 10px;
-            padding-left: 20px;
-            border-left: 2px solid var(--primary-color);
-        }
-        .resposta {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #3a3a3a;
-            border-radius: 4px;
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: #333;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            color: var(--text-color);
-        }
-        .modal-content h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-        .modal-content p {
-            margin-bottom: 20px;
-            font-size: 1.1em;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: space-around;
-        }
-        .modal-actions button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 1em;
-        }
-        .confirm-delete {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .confirm-delete:hover {
-            background-color: #c0392b;
-        }
-        .cancel-modal {
-            background-color: var(--input-bg);
-            color: var(--text-color);
-        }
-        .cancel-modal:hover {
-            background-color: var(--input-focus);
-        }
-    </style>
     <script>
         function showDeleteModal(postId) {
             const modal = document.getElementById('delete-modal');
@@ -94,23 +18,54 @@
         function hideDeleteModal() {
             document.getElementById('delete-modal').style.display = 'none';
         }
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
     </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
-            <div class="logo"></div>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i></a></li>
-                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i></a></li>
-                    {% if usuario['tipo_usuario'] == 'admin' %}
-                        <li><a href="{{ url_for('admin') }}"><i class="fas fa-user-shield"></i></a></li>
-                    {% endif %}
-                </ul>
-            </nav>
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
+
+    <!-- Menu Lateral -->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
+            <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
+            <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
+            <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
+            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
+            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
+            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
+            {% if session.get('tipo_usuario') == 'admin' %}
+                <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
+                <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
+                <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
+                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+        </ul>
+    </nav>
+
+    <!-- Conteúdo Principal -->
     <main class="forum-page">
         <section class="hero">
             <h1 class="animate-text">Fórum da Comunidade</h1>
@@ -118,9 +73,9 @@
         <div class="content">
             <div class="form-container">
                 <h2>Criar Nova Postagem</h2>
-                <form method="POST">
+                <form method="POST" action="{{ url_for('forum') }}">
                     <div class="form-group">
-                        <label for="categoria">Categoria:</label>
+                        <label for="categoria"><i class="fas fa-list"></i> Categoria:</label>
                         <select name="categoria" id="categoria" required>
                             <option value="Eventos">Eventos</option>
                             <option value="Sugestões">Sugestões</option>
@@ -129,29 +84,29 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="titulo">Título:</label>
+                        <label for="titulo"><i class="fas fa-heading"></i> Título:</label>
                         <input type="text" name="titulo" id="titulo" required placeholder="Digite o título da postagem">
                     </div>
                     <div class="form-group">
-                        <label for="mensagem">Mensagem:</label>
+                        <label for="mensagem"><i class="fas fa-comment-alt"></i> Mensagem:</label>
                         <textarea name="mensagem" id="mensagem" required placeholder="Escreva sua mensagem aqui"></textarea>
                     </div>
-                    <input type="submit" value="Publicar Postagem">
+                    <input type="submit" value="Publicar Postagem" class="btn-login">
                 </form>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
-                        <ul class="flash-messages">
+                        <div class="flash-messages">
                             {% for message in messages %}
-                                <li>{{ message }}</li>
+                                <p>{{ message }}</p>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% endif %}
                 {% endwith %}
             </div>
             <div class="forum-list-container">
                 <h2>Postagens do Fórum</h2>
-                <div style="margin-bottom: 20px;">
-                    <label for="filtro-categoria">Filtrar por Categoria:</label>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="filtro-categoria"><i class="fas fa-filter"></i> Filtrar por Categoria:</label>
                     <select id="filtro-categoria" onchange="window.location.href='{{ url_for('forum') }}?categoria=' + this.value;">
                         <option value="">Todas</option>
                         <option value="Eventos" {% if categoria_filtro == 'Eventos' %}selected{% endif %}>Eventos</option>
@@ -163,39 +118,42 @@
                 {% if posts_com_respostas|length > 0 %}
                     <ul class="forum-list">
                         {% for post, respostas in posts_com_respostas %}
-                        <li>
-                            <strong>Categoria:</strong> {{ post['categoria'] }}<br>
-                            <strong>Título:</strong> {{ post['titulo'] }}<br>
-                            <strong>Autor:</strong> {{ post['usuario_nome'] }}<br>
-                            <strong>Mensagem:</strong> {{ post['mensagem'] }}<br>
-                            <strong>Data:</strong> {{ post['data_postagem'] }}<br>
-                            {% if post['usuario_id'] == session['user_id'] %}
-                                <form method="POST" style="display: inline;" id="delete-form-{{ post['id'] }}">
-                                    <input type="hidden" name="delete_post_id" value="{{ post['id'] }}">
-                                    <button type="button" class="btn-delete" onclick="showDeleteModal({{ post['id'] }})">
-                                        <i class="fas fa-trash"></i> Excluir
-                                    </button>
-                                </form>
-                            {% endif %}
-                            <div class="respostas">
-                                <h4>Respostas:</h4>
-                                {% if respostas|length > 0 %}
-                                    {% for resposta in respostas %}
-                                    <div class="resposta">
-                                        <strong>{{ resposta['usuario_nome'] }}:</strong> {{ resposta['mensagem'] }}<br>
-                                        <strong>Data:</strong> {{ resposta['data_resposta'] }}
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p>Sem respostas ainda.</p>
+                            <li>
+                                <strong>Categoria:</strong> {{ post['categoria'] }}<br>
+                                <strong>Título:</strong> {{ post['titulo'] }}<br>
+                                <strong>Autor:</strong> {{ post['usuario_nome'] }}<br>
+                                <strong>Mensagem:</strong> {{ post['mensagem'] }}<br>
+                                <strong>Data:</strong> {{ post['data_postagem'] }}<br>
+                                {% if post['usuario_id'] == session['user_id'] %}
+                                    <form method="POST" action="{{ url_for('forum') }}" style="display: inline;" id="delete-form-{{ post['id'] }}">
+                                        <input type="hidden" name="delete_post_id" value="{{ post['id'] }}">
+                                        <button type="button" class="btn-delete" onclick="showDeleteModal({{ post['id'] }})">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                    </form>
                                 {% endif %}
-                                <form method="POST">
-                                    <input type="hidden" name="post_id" value="{{ post['id'] }}">
-                                    <textarea name="resposta_mensagem" required placeholder="Escreva sua resposta"></textarea>
-                                    <input type="submit" value="Responder">
-                                </form>
-                            </div>
-                        </li>
+                                <div class="respostas">
+                                    <h4>Respostas:</h4>
+                                    {% if respostas|length > 0 %}
+                                        {% for resposta in respostas %}
+                                            <div class="resposta">
+                                                <strong>{{ resposta['usuario_nome'] }}:</strong> {{ resposta['mensagem'] }}<br>
+                                                <strong>Data:</strong> {{ resposta['data_resposta'] }}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>Sem respostas ainda.</p>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('forum') }}">
+                                        <input type="hidden" name="post_id" value="{{ post['id'] }}">
+                                        <div class="form-group">
+                                            <label for="resposta_mensagem_{{ post['id'] }}"><i class="fas fa-comment-alt"></i> Responder:</label>
+                                            <textarea name="resposta_mensagem" id="resposta_mensagem_{{ post['id'] }}" required placeholder="Escreva sua resposta"></textarea>
+                                        </div>
+                                        <input type="submit" value="Responder" class="btn-login">
+                                    </form>
+                                </div>
+                            </li>
                         {% endfor %}
                     </ul>
                 {% else %}
@@ -203,17 +161,38 @@
                 {% endif %}
             </div>
         </div>
+
         <!-- Modal de Confirmação de Exclusão -->
-        <div id="delete-modal" class="modal">
+        <div id="delete-modal" class="modal" style="display: none;">
             <div class="modal-content">
-                <h3>Confirmação de Exclusão</h3>
+                <h3>Confirmar Exclusão</h3>
                 <p>Tem certeza que deseja excluir esta postagem?</p>
                 <div class="modal-actions">
-                    <button id="confirm-delete-btn" class="confirm-delete">Sim</button>
+                    <button id="confirm-delete-btn" class="confirm-delete">Sim, Excluir</button>
                     <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Barra Inferior -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
+            <i class="fas fa-bullhorn"></i>
+            <span>Anúncios</span>
+        </a>
+        <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Reservas</span>
+        </a>
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
+            <i class="fas fa-envelope"></i>
+            <span>Mensagens</span>
+        </a>
+    </nav>
 </body>
 </html>
