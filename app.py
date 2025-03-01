@@ -1,46 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
-from flask_session import Session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
-import os
 from functools import wraps
-import firebase_admin
-from firebase_admin import credentials, messaging
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Use uma chave secreta forte em produção
-
-# Configuração para upload de arquivos
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Certifique-se de que o diretório de uploads existe
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-# Configuração para sessões persistentes
-app.config['SESSION_TYPE'] = 'filesystem'  # Armazena sessões no sistema de arquivos
-Session(app)
-
-# Configuração do Firebase Admin SDK com credenciais embutidas
-firebase_cred = {
-    "type": "service_account",
-    "project_id": "appcondominio-2fcac",
-    "private_key_id": "8c469fdb3033d16c59a7ce731b467542d2d6caa1",
-    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC980BYeZyhddRK\nGJjfbIxrMieAeqoZFptiYo0B9FWHjLdopcaXtwq1fAfCMprwrO2Nw7aLIanA0gt9\nI+wfNci7bkfI1X3yk2gkSKvZP36AWSPeCKFYiOxwoPxXWWacmo06sr9H9jKyrqjs\nIqBgZVkYPULAq+AW+cH2tHGhDtf9dM+kviqFXXSw3UY5p2/jpLDPDrH/tIUnFoMp\nfVFg9alZ0sHNW4Q/585ePg1ebdFHHfjIwEGWnDVQyUfezxUlJybb+aYlKqE1vEEE\nYRDQjA33ZrODwUstf8SCPycBxrvwyaYYL4gZXkYkj2pyG4cx1G+YEI1ryZvaUZ+8\n9jG7P4ILAgMBAAECggEAQL9/wgjmQsVa8Uz0I0ipjsrAW1O00qt5mO5V+YITe4qU\nZFgJ22JaBKX8MQ618O9JZIb/nOqDJkaTAvuxO6xGOdmsH4HilkL3/1JEPeAeW1rH\nVqKjeP3ndrbxfUbsqtol5QnUGRALlQvjaeadu24gkhojvHB6COrm2pUEnK1mI69M\n0RWQjn+NrKGCthzaUx4rJz7R9y3VGa5gLg6Mz4h+n89RTp/P/E91Bokyn/Dd4xns\ny9Rc4PGAhxNOumXd/OuiqqAfVTJczF3+Dss8tHtMrmxQj03v+E3aKGqAQxe7J0vm\nkZbGhExIdFSy+kqRQcTqdr9RA+IDESvvE3oohxeZoQKBgQDg2oWtspteM44C1NwH\nOjRIs1LH3XCipbg9iMC31lqcBSPOUiCwVo1lvOascS2/O0LbCFKupzu5FDa2SGpg\nqfi8s6jTIj/TrOMG+3wqX84e43UxHNVQU11kQdvpEF/PqCK1+ZBIjDff6R1mhVkP\nZivgX9QP6EPE9iJF77WOKVBHawKBgQDYQwc+kZYq0QrPxX648R/MGujFPWu7aTkq\n6qAFcAcM8AvqRjjvif5PdxfePCwO894YzFmOudVpsbgp9l8bu+FfDlJ8guIplhYx\nNSc18DY9ZTy/QDBK7a+vDMK84/dAuow0VpkPE6WgNGJxrDx9B1fnl/i+i1UIrNXg\nstRzFPp34QKBgQCcUg+BlJxDP2BJQ6a8N5DFwjWY0bBOwxt1XC9vH0zbDw+3jo0/\nSsz+n/dWh1CglBiEoiKpXYY9w3nN/EZIcaKFvflu3260QIuM/SVzaCuqecOtozgB\nohNZchfqzgFuIpwPGzNd3G2z8yMHdUlXVVbHpJePf5AtzFhDesUj0kEHhQKBgQCR\nQlR3XmqzT74nWMyJhMyK1/hJo7vdIgxYG0ho3pqdwg7+yTQtEU9UKPZLO7eMQ5mG\nppvxFjmWyNyesvGnO0diBci6AV/P9xPo8X7o5/RGwN1QyNinO4ep2LRlE+pb+/F4\npkIgsl2pggYtvDbU9D3DPXzC3+u56/2s8/Fna0vhgQKBgQC6V5wdAInAxxRCS9Fk\nH5FSeToReDVschP05vuqEUIgjrkZ75j4/C2utAi/y7myXGplY82VD9J672srgI6c\nZCWBxlrZytSe2jjC7W7GTywL7OZqFZ4nAYzAmbCuSxpRKD4WmhCKVOTfVc9gDN/h\nTrls7GHyzgdm0SIoj6fyy2mj6A==\n-----END PRIVATE KEY-----\n",
-    "client_email": "firebase-adminsdk-fbsvc@appcondominio-2fcac.iam.gserviceaccount.com",
-    "client_id": "117990932930345036538",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40appcondominio-2fcac.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com"
-}
-cred = credentials.Certificate(firebase_cred)
-firebase_admin.initialize_app(cred)
 
 # Filtro personalizado para formatar datas
 def datetime_to_local(value):
@@ -52,15 +17,11 @@ def datetime_to_local(value):
 app.jinja_env.filters['datetime_to_local'] = datetime_to_local
 app.jinja_env.filters['strftime'] = lambda value, fmt: datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S').strftime(fmt) if value else value
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 def get_db_connection():
     conn = sqlite3.connect('condominio.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    # Criação das tabelas (mantidas como no original)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,8 +32,7 @@ def get_db_connection():
         rua TEXT,
         numero TEXT,
         garagem TEXT,
-        tipo_ocupacao TEXT,
-        fcm_token TEXT  -- Adicionado para armazenar o token FCM
+        tipo_ocupacao TEXT
     )
     ''')
     cursor.execute('''
@@ -208,19 +168,11 @@ def get_db_connection():
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
-    try:
-        cursor.execute('ALTER TABLE anuncios ADD COLUMN titulo TEXT NOT NULL DEFAULT ""')
-    except sqlite3.OperationalError:
-        pass  # Coluna já existe
-    try:
-        cursor.execute('ALTER TABLE anuncios ADD COLUMN imagem TEXT')
-    except sqlite3.OperationalError:
-        pass  # Coluna já existe
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS forum_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER,
-        categoria TEXT NOT NULL,
+        categoria TEXT NOT NULL,  -- Ex.: Eventos, Sugestões, Manutenção
         titulo TEXT NOT NULL,
         mensagem TEXT NOT NULL,
         data_postagem TIMESTAMP,
@@ -242,14 +194,7 @@ def get_db_connection():
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
-
-    # Adicionar coluna fcm_token à tabela usuarios se não existir
-    try:
-        cursor.execute('ALTER TABLE usuarios ADD COLUMN fcm_token TEXT')
-    except sqlite3.OperationalError:
-        pass  # Coluna já existe
-
-    conn.commit()
+    conn.commit()  # Salva as alterações no esquema
     return conn
 
 def admin_required(f):
@@ -269,23 +214,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Função para enviar notificação push com logs de depuração
-def send_push_notification(token, title, body):
-    if not token:
-        print("Nenhum token FCM fornecido")
-        return False
-    message = messaging.Message(
-        notification=messaging.Notification(title=title, body=body),
-        token=token,
-    )
-    try:
-        response = messaging.send(message)
-        print(f"Notificação enviada com sucesso para {token}: {response}")
-        return True
-    except Exception as e:
-        print(f"Erro ao enviar notificação para {token}: {e}")
-        return False
-
 @app.route('/')
 def index():
     if 'user_id' not in session:
@@ -294,38 +222,29 @@ def index():
     conn = get_db_connection()
     usuario = conn.execute('SELECT nome, tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
     avisos = conn.execute('SELECT * FROM avisos ORDER BY data_envio DESC').fetchall()
+    mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
+                            (session['user_id'],)).fetchall()
     moradores = conn.execute('SELECT * FROM usuarios WHERE tipo_usuario = "usuario"').fetchall()
     conn.close()
-    return render_template('index.html', usuario=usuario, avisos=avisos, moradores=moradores)
+    return render_template('index.html', usuario=usuario, avisos=avisos, mensagens=mensagens, moradores=moradores)
 
-@app.route('/mensagens')
-def mensagens():
+@app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
+def delete_mensagem(mensagem_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     conn = get_db_connection()
-    usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
-    mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
-                            (session['user_id'],)).fetchall()
-    conn.close()
-    return render_template('mensagens.html', mensagens=mensagens, usuario=usuario)
-
-@app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
-@admin_required
-def delete_mensagem(mensagem_id):
-    conn = get_db_connection()
     cur = conn.cursor()
-    # Verifica se a mensagem pertence ao administrador como remetente
-    mensagem = conn.execute('SELECT remetente_id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
-    if mensagem and mensagem['remetente_id'] == session['user_id']:
-        cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ?',
-                    (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id))
-        conn.commit()
-        flash('Mensagem excluída com sucesso!', 'success')
-    else:
+    cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ? AND destinatario_id = ?', 
+                (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id, session['user_id']))
+    if not cur.rowcount:
+        conn.close()
         flash('Você não tem permissão para excluir esta mensagem!', 'error')
+        return redirect(url_for('index'))
+    conn.commit()
     conn.close()
-    return redirect(url_for('mensagens'))
+    flash('Mensagem excluída com sucesso!', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -337,8 +256,6 @@ def login():
         if user and check_password_hash(user['senha_hash'], password):
             session['user_id'] = user['id']
             session['tipo_usuario'] = user['tipo_usuario']
-            session.permanent = True  # Sessão persiste mesmo após fechar o app
-            conn.close()
             return redirect(url_for('index'))
         conn.close()
         flash('Email ou senha incorretos!', 'error')
@@ -587,9 +504,6 @@ def comunicacao():
                 cur.execute('''INSERT INTO avisos (titulo, mensagem, data_envio)
                                 VALUES (?, ?, ?)''', (titulo, mensagem, data_envio))
                 conn.commit()
-                # Enviar notificação para todos os usuários
-                for user in conn.execute('SELECT fcm_token FROM usuarios WHERE fcm_token IS NOT NULL').fetchall():
-                    send_push_notification(user['fcm_token'], 'Novo Aviso', mensagem)
                 flash('Aviso geral enviado com sucesso!', 'success')
             elif tipo_comunicacao == 'especifico':
                 destinatario_id = request.form['destinatario_id']
@@ -601,10 +515,6 @@ def comunicacao():
                     cur.execute('''INSERT INTO correspondencias (usuario_id, tipo, descricao, data_recebimento, status)
                                     VALUES (?, ?, ?, ?, ?)''', (destinatario_id, tipo_correspondencia, mensagem, data_envio, 'Recebida'))
                 conn.commit()
-                # Enviar notificação ao destinatário
-                token = conn.execute('SELECT fcm_token FROM usuarios WHERE id = ?', (destinatario_id,)).fetchone()['fcm_token']
-                if token:
-                    send_push_notification(token, 'Nova Mensagem', mensagem)
                 flash('Mensagem enviada com sucesso!' + (' Correspondência registrada!' if is_correspondencia else ''), 'success')
         elif 'delete_mensagem_id' in request.form:
             mensagem_id = request.form['delete_mensagem_id']
@@ -850,59 +760,21 @@ def correspondencias():
 def estacionamento():
     conn = get_db_connection()
     if request.method == 'POST':
-        usuario_id = request.form['usuario_id']
         placa = request.form['placa']
         modelo = request.form['modelo']
         vaga_estacionamento = request.form['vaga_estacionamento']
 
         cur = conn.cursor()
-        try:
-            cur.execute('''INSERT INTO veiculos (usuario_id, placa, modelo, vaga_estacionamento)
-                            VALUES (?, ?, ?, ?)''', (usuario_id, placa, modelo, vaga_estacionamento))
-            conn.commit()
-            flash('Veículo registrado com sucesso!', 'success')
-        except sqlite3.IntegrityError:
-            flash('Placa já registrada!', 'error')
-        finally:
-            conn.close()
+        cur.execute('''INSERT INTO veiculos (usuario_id, placa, modelo, vaga_estacionamento)
+                        VALUES (?, ?, ?, ?)''', (session['user_id'], placa, modelo, vaga_estacionamento))
+        conn.commit()
+        conn.close()
+        flash('Veículo registrado com sucesso!', 'success')
         return redirect(url_for('estacionamento'))
 
-    usuarios = conn.execute('SELECT id, nome FROM usuarios WHERE tipo_usuario = "usuario"').fetchall()
-    veiculos = conn.execute('SELECT v.*, u.nome AS usuario_nome FROM veiculos v JOIN usuarios u ON v.usuario_id = u.id').fetchall()
+    veiculos = conn.execute('SELECT * FROM veiculos').fetchall()
     conn.close()
-    return render_template('estacionamento.html', veiculos=veiculos, usuarios=usuarios)
-
-@app.route('/edit_veiculo/<int:veiculo_id>', methods=['POST'])
-@admin_required
-def edit_veiculo(veiculo_id):
-    conn = get_db_connection()
-    usuario_id = request.form['usuario_id']
-    placa = request.form['placa']
-    modelo = request.form['modelo']
-    vaga_estacionamento = request.form['vaga_estacionamento']
-    
-    cur = conn.cursor()
-    try:
-        cur.execute('''UPDATE veiculos SET usuario_id = ?, placa = ?, modelo = ?, vaga_estacionamento = ?
-                       WHERE id = ?''', (usuario_id, placa, modelo, vaga_estacionamento, veiculo_id))
-        conn.commit()
-        flash('Veículo atualizado com sucesso!', 'success')
-    except sqlite3.IntegrityError:
-        flash('Placa já registrada para outro veículo!', 'error')
-    finally:
-        conn.close()
-    return redirect(url_for('estacionamento'))
-
-@app.route('/delete_veiculo/<int:veiculo_id>', methods=['POST'])
-@admin_required
-def delete_veiculo(veiculo_id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('DELETE FROM veiculos WHERE id = ?', (veiculo_id,))
-    conn.commit()
-    conn.close()
-    flash('Veículo excluído com sucesso!', 'success')
-    return redirect(url_for('estacionamento'))
+    return render_template('estacionamento.html', veiculos=veiculos)
 
 @app.route('/emergencias', methods=['GET', 'POST'])
 @admin_required
@@ -926,33 +798,6 @@ def emergencias():
     conn.close()
     return render_template('emergencias.html', emergencias=emergencias)
 
-@app.route('/edit_emergencia/<int:emergencia_id>', methods=['POST'])
-@admin_required
-def edit_emergencia(emergencia_id):
-    conn = get_db_connection()
-    titulo = request.form['titulo']
-    procedimento = request.form['procedimento']
-    contatos = request.form['contatos']
-    
-    cur = conn.cursor()
-    cur.execute('''UPDATE emergencias SET titulo = ?, procedimento = ?, contatos = ?
-                   WHERE id = ?''', (titulo, procedimento, contatos, emergencia_id))
-    conn.commit()
-    conn.close()
-    flash('Emergência atualizada com sucesso!', 'success')
-    return redirect(url_for('emergencias'))
-
-@app.route('/delete_emergencia/<int:emergencia_id>', methods=['POST'])
-@admin_required
-def delete_emergencia(emergencia_id):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('DELETE FROM emergencias WHERE id = ?', (emergencia_id,))
-    conn.commit()
-    conn.close()
-    flash('Emergência excluída com sucesso!', 'success')
-    return redirect(url_for('emergencias'))
-
 @app.route('/anuncios', methods=['GET', 'POST'])
 def anuncios():
     if 'user_id' not in session:
@@ -962,38 +807,21 @@ def anuncios():
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
     if request.method == 'POST':
-        if 'tipo' in request.form and 'titulo' in request.form and 'descricao' in request.form:  # Criar novo anúncio
+        if 'tipo' in request.form and 'descricao' in request.form:  # Criar novo anúncio
             tipo = request.form['tipo']
-            titulo = request.form['titulo']
             descricao = request.form['descricao']
             data_criacao = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            imagem = None
-
-            # Verifica se há um arquivo na requisição
-            if 'imagem' in request.files:
-                file = request.files['imagem']
-                if file and allowed_file(file.filename):
-                    filename = secure_filename(file.filename)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    imagem = filename
-
             cur = conn.cursor()
-            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, titulo, descricao, data_criacao, imagem)
-                            VALUES (?, ?, ?, ?, ?, ?)''', (session['user_id'], tipo, titulo, descricao, data_criacao, imagem))
+            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, descricao, data_criacao)
+                            VALUES (?, ?, ?, ?)''', (session['user_id'], tipo, descricao, data_criacao))
             conn.commit()
             flash('Anúncio criado com sucesso!', 'success')
         elif 'delete_anuncio_id' in request.form:  # Excluir anúncio
             anuncio_id = request.form['delete_anuncio_id']
-            anuncio = conn.execute('SELECT usuario_id, imagem FROM anuncios WHERE id = ?', (anuncio_id,)).fetchone()
+            anuncio = conn.execute('SELECT usuario_id FROM anuncios WHERE id = ?', (anuncio_id,)).fetchone()
             if anuncio['usuario_id'] != session['user_id']:
                 flash('Você não tem permissão para excluir este anúncio!', 'error')
             else:
-                # Remove a imagem do servidor, se existir
-                if anuncio['imagem']:
-                    try:
-                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], anuncio['imagem']))
-                    except OSError:
-                        pass  # Ignora se o arquivo não existir
                 cur = conn.cursor()
                 cur.execute('DELETE FROM anuncios WHERE id = ? AND usuario_id = ?', (anuncio_id, session['user_id'],))
                 conn.commit()
@@ -1002,10 +830,6 @@ def anuncios():
     anuncios = conn.execute('SELECT a.*, u.nome AS usuario_nome FROM anuncios a JOIN usuarios u ON a.usuario_id = u.id ORDER BY data_criacao DESC').fetchall()
     conn.close()
     return render_template('anuncios.html', anuncios=anuncios, usuario=usuario)
-
-@app.route('/static/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/forum', methods=['GET', 'POST'])
 def forum():
@@ -1042,11 +866,12 @@ def forum():
                 flash('Você não tem permissão para excluir esta postagem!', 'error')
             else:
                 cur = conn.cursor()
-                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))
+                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))  # Exclui respostas primeiro
                 cur.execute('DELETE FROM forum_posts WHERE id = ? AND usuario_id = ?', (post_id, session['user_id'],))
                 conn.commit()
                 flash('Postagem excluída com sucesso!', 'success')
 
+    # Busca postagens e respostas
     categoria_filtro = request.args.get('categoria', '')
     if categoria_filtro:
         posts = conn.execute('SELECT p.*, u.nome AS usuario_nome FROM forum_posts p JOIN usuarios u ON p.usuario_id = u.id WHERE p.categoria = ? ORDER BY data_postagem DESC', (categoria_filtro,)).fetchall()
@@ -1066,39 +891,5 @@ def forum():
 def admin():
     return render_template('admin.html')
 
-@app.route('/register_token', methods=['POST'])
-def register_token():
-    if 'user_id' not in session:
-        return 'Unauthorized', 401
-    token = request.json.get('token')
-    print(f"Token FCM recebido do frontend: {token}")  # Log para depuração
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('UPDATE usuarios SET fcm_token = ? WHERE id = ?', (token, session['user_id']))
-    conn.commit()
-    conn.close()
-    return 'Token registrado', 200
-
-@app.route('/send_notification', methods=['POST'])
-def send_notification():
-    if 'user_id' not in session:
-        return 'Unauthorized', 401
-    conn = get_db_connection()
-    user = conn.execute('SELECT fcm_token FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
-    conn.close()
-    token = user['fcm_token']
-    if not token:
-        print("Nenhum token FCM encontrado para o usuário")
-        return 'Token não encontrado', 400
-    
-    title = request.form.get('title', 'Nova Notificação')
-    body = request.form.get('body', 'Você tem uma nova mensagem no sistema!')
-    print(f"Enviando notificação - Título: {title}, Corpo: {body}, Token: {token}")  # Log para depuração
-    success = send_push_notification(token, title, body)
-    if success:
-        return f'Notificação enviada', 200
-    return 'Erro ao enviar notificação', 500
-
 if __name__ == '__main__':
-    print("Iniciando o aplicativo Flask...")
     app.run(debug=True)
