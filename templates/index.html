@@ -139,10 +139,10 @@
 
         <!-- Recursos Rápidos -->
         <section class="features">
-            <a href="{{ url_for('reservas') }}" class="feature-link">
+            <a href="{{ url_for('perfil') }}" class="feature-link">
                 <div class="feature">
-                    <i class="fas fa-calendar-alt feature-icon"></i>
-                    <h3>Reservas</h3>
+                    <i class="fas fa-user feature-icon"></i>
+                    <h3>Perfil</h3>
                 </div>
             </a>
             <a href="{{ url_for('moradores') }}" class="feature-link">
@@ -159,7 +159,7 @@
             </a>
             <a href="{{ url_for('mensagens') }}" class="feature-link">
                 <div class="feature">
-                    <i class="fas fa-envelope feature-icon"></i>
+                    <i class="fas fa-comment-alt feature-icon"></i>
                     <h3>Mensagens</h3>
                 </div>
             </a>
@@ -180,9 +180,9 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
-            <i class="fas fa-envelope"></i>
-            <span>Mensagens</span>
+        <a href="{{ url_for('correspondencias') }}" class="{% if request.endpoint == 'correspondencias' %}active{% endif %}">
+            <i class="fas fa-mail-bulk"></i>
+            <span>Correspondências</span>
         </a>
     </nav>
 </body>
