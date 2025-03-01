@@ -69,12 +69,7 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div class="logo">Residencial Costa Verde</div>
-            <div class="user-info">
-                {% if usuario %}
-                    <span>{{ usuario['nome'] }}</span>
-                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
-                {% endif %}
-            </div>
+            <!-- Removido .user-info com nome e botão de logout -->
         </div>
     </header>
 
@@ -87,6 +82,7 @@
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
             <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('mensagens') }}"><i class="fas fa-envelope"></i> Mensagens</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
@@ -156,10 +152,10 @@
                     <h3>Fórum</h3>
                 </div>
             </a>
-            <a href="{{ url_for('correspondencias') }}" class="feature-link">
+            <a href="{{ url_for('mensagens') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-envelope feature-icon"></i>
-                    <h3>Correspondências</h3>
+                    <h3>Mensagens</h3>
                 </div>
             </a>
         </section>
@@ -179,9 +175,9 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
+        <a href="{{ url_for('correspondencias') }}" class="{% if request.endpoint == 'correspondencias' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
-            <span>Mensagens</span>
+            <span>Correio</span>
         </a>
     </nav>
 </body>
