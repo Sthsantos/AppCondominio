@@ -14,18 +14,26 @@
     </script>
 </head>
 <body>
+    <!-- Cabeçalho Fixo -->
     <header>
         <div class="navbar">
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Administração de Condomínios</div>
+            <div class="user-info">
+                {% if usuario %}
+                    <span>{{ usuario['nome'] }}</span>
+                    <a href="{{ url_for('logout') }}" class="logout-icon"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
             <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
@@ -34,6 +42,7 @@
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
+            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -45,59 +54,60 @@
         </ul>
     </nav>
 
+    <!-- Conteúdo Principal -->
     <main class="cadastro-moradores-page">
         <section class="hero">
             <h1 class="animate-text">Cadastro de Moradores</h1>
         </section>
-        <section class="content">
+        <div class="content">
             <div class="form-container">
                 <h2>Novo Morador</h2>
                 <form method="POST" action="{{ url_for('cadastro_moradores') }}">
                     <div class="form-group">
-                        <label for="nome">Nome:</label>
-                        <input type="text" name="nome" id="nome" required>
+                        <label for="nome"><i class="fas fa-user"></i> Nome:</label>
+                        <input type="text" name="nome" id="nome" required placeholder="Digite o nome">
                     </div>
                     <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" name="email" id="email" required>
+                        <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+                        <input type="email" name="email" id="email" required placeholder="Digite o email">
                     </div>
                     <div class="form-group">
-                        <label for="password">Senha:</label>
-                        <input type="password" name="password" id="password" required>
+                        <label for="password"><i class="fas fa-lock"></i> Senha:</label>
+                        <input type="password" name="password" id="password" required placeholder="Digite a senha">
                     </div>
                     <div class="form-group">
-                        <label for="rua">Nome da Rua:</label>
-                        <input type="text" name="rua" id="rua">
+                        <label for="rua"><i class="fas fa-road"></i> Nome da Rua:</label>
+                        <input type="text" name="rua" id="rua" placeholder="Digite a rua">
                     </div>
                     <div class="form-group">
-                        <label for="numero">Número da Casa/Apartamento:</label>
-                        <input type="text" name="numero" id="numero">
+                        <label for="numero"><i class="fas fa-home"></i> Número da Casa/Apartamento:</label>
+                        <input type="text" name="numero" id="numero" placeholder="Digite o número">
                     </div>
                     <div class="form-group">
-                        <label for="garagem">Número da Garagem:</label>
-                        <input type="text" name="garagem" id="garagem">
+                        <label for="garagem"><i class="fas fa-car"></i> Número da Garagem:</label>
+                        <input type="text" name="garagem" id="garagem" placeholder="Digite o número da garagem">
                     </div>
                     <div class="form-group">
-                        <label for="tipo_ocupacao">Tipo de Ocupação:</label>
+                        <label for="tipo_ocupacao"><i class="fas fa-user-tag"></i> Tipo de Ocupação:</label>
                         <select name="tipo_ocupacao" id="tipo_ocupacao">
                             <option value="">Selecione</option>
                             <option value="Proprietário">Proprietário</option>
                             <option value="Inquilino">Inquilino</option>
                         </select>
                     </div>
-                    <input type="submit" value="Cadastrar Morador">
+                    <input type="submit" value="Cadastrar Morador" class="btn-login">
                 </form>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
-                        <ul class="flash-messages">
+                        <div class="flash-messages">
                             {% for message in messages %}
-                                <li>{{ message }}</li>
+                                <p>{{ message }}</p>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% endif %}
                 {% endwith %}
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Barra Inferior -->
@@ -114,7 +124,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
+        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
