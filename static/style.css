@@ -33,17 +33,19 @@ header {
 /* Navbar */
 .navbar {
     background-color: var(--header-color);
-    padding: 1rem;
+    padding: 1rem 1.5rem; /* Aumentei o padding lateral para mais espaço */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
+    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
     z-index: 1000;
-    box-shadow: 0 4px 12px var(--shadow-color); /* Sombra mais suave */
+    box-shadow: 0 4px 12px var(--shadow-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
+    min-height: 60px; /* Altura mínima para evitar cortes */
 }
 
 /* Botão de toggle do menu lateral */
@@ -68,7 +70,8 @@ header {
     font-size: 1.5em;
     color: var(--link-color);
     text-align: center;
-    letter-spacing: 1px; /* Espaçamento para sofisticação */
+    letter-spacing: 1px;
+    flex-grow: 1; /* Permite que o logo ocupe o espaço disponível */
 }
 
 /* User Info */
@@ -76,6 +79,8 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+    padding-right: 10px; /* Espaço extra à direita para evitar cortes */
 }
 
 .user-info span {
@@ -137,7 +142,7 @@ header {
 .sidebar ul li a:hover {
     color: var(--primary-color);
     background-color: rgba(255, 255, 255, 0.05);
-    padding-left: 25px; /* Efeito de deslocamento */
+    padding-left: 25px;
 }
 
 .sidebar ul li a i {
@@ -147,7 +152,7 @@ header {
 
 /* Main Content */
 main {
-    margin-top: 70px; /* Ajustado para header maior */
+    margin-top: 70px; /* Mantido para acomodar o header fixo */
     padding: 20px;
 }
 
@@ -284,6 +289,7 @@ main {
     flex-direction: column;
     justify-content: center;
     border: 1px solid var(--border-color);
+    position: relative;
 }
 
 .feature-icon {
@@ -305,7 +311,7 @@ main {
 }
 
 .feature p {
-    display: none; /* Simplificado */
+    display: none;
 }
 
 /* Bottom Navigation */
@@ -330,6 +336,7 @@ main {
     flex: 1;
     padding: 8px;
     transition: all 0.3s ease;
+    position: relative;
 }
 
 .bottom-nav a.active {
@@ -348,6 +355,24 @@ main {
     font-weight: 500;
 }
 
+/* Badge para notificações não lidas */
+.badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    width: 1.2em;
+    height: 1.2em;
+    line-height: 1.2em;
+    text-align: center;
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
 /* Login Page e Formulários */
 .login-container,
 .cadastro-moradores-page .content,
@@ -364,7 +389,7 @@ main {
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    min-height: calc(100vh - 140px); /* Ajustado para header e bottom-nav */
+    min-height: calc(100vh - 140px);
     padding: 20px;
     background-color: var(--background-color);
 }
@@ -435,7 +460,7 @@ main {
     border-color: var(--primary-color);
     background-color: var(--input-focus);
     outline: none;
-    box-shadow: 0 0 5px rgba(26, 188, 156, 0.3); /* Aura sutil */
+    box-shadow: 0 0 5px rgba(26, 188, 156, 0.3);
 }
 
 .login-form input[type="email"]::placeholder,
@@ -716,7 +741,7 @@ main {
 /* Media Queries para Responsividade */
 @media screen and (max-width: 768px) {
     .navbar {
-        padding: 0.75rem;
+        padding: 0.75rem 1rem;
     }
 
     .sidebar {
@@ -792,6 +817,10 @@ main {
 }
 
 @media screen and (max-width: 480px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+
     .logo {
         font-size: 1.2em;
     }
