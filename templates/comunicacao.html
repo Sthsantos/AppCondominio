@@ -3,51 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comunicação - Administração de Condomínios</title>
+    <title>Comunicação - Residencial Costa Verde</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilo do Modal Moderno */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-content h3 {
+            margin: 0 0 15px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .modal-content p {
+            margin: 0 0 20px;
+            color: #666;
+            font-size: 1em;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .confirm-delete, .cancel-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .confirm-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .cancel-modal {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .cancel-modal:hover {
+            background-color: #bbb;
+        }
+    </style>
     <script>
         function toggleDestinatario() {
             const tipo = document.getElementById('tipo_comunicacao').value;
             const destinatarioDiv = document.getElementById('destinatario_div');
-            if (tipo === 'especifico') {
-                destinatarioDiv.style.display = 'block';
-            } else {
-                destinatarioDiv.style.display = 'none';
-            }
+            destinatarioDiv.style.display = tipo === 'especifico' ? 'block' : 'none';
         }
 
         function toggleEditForm(id, type) {
             const form = document.getElementById('edit-form-' + type + '-' + id);
-            if (form.style.display === 'none' || form.style.display === '') {
-                form.style.display = 'block';
-            } else {
-                form.style.display = 'none';
-            }
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
         }
+
+        let currentForm = null; // Variável global para armazenar o formulário atual
 
         function showDeleteModal(id, type) {
             const modal = document.getElementById('delete-modal');
             const form = document.getElementById('delete-form-' + type + '-' + id);
+            if (!form) {
+                console.error('Formulário de exclusão não encontrado para ID:', id, 'e tipo:', type);
+                return;
+            }
+            console.log('Abrindo modal para ID:', id, 'do tipo:', type);
+            currentForm = form; // Armazena o formulário atual
             modal.style.display = 'flex';
-            modal.querySelector('.confirm-delete').onclick = function() {
-                form.submit();
-            };
+        }
+
+        function confirmDelete() {
+            if (currentForm) {
+                console.log('Confirmando exclusão para formulário:', currentForm);
+                currentForm.submit();
+            } else {
+                console.error('Nenhum formulário selecionado para exclusão');
+            }
+            hideDeleteModal();
         }
 
         function hideDeleteModal() {
             const modal = document.getElementById('delete-modal');
             modal.style.display = 'none';
+            currentForm = null; // Limpa o formulário atual
         }
 
         function toggleCorrespondencia() {
             const isCorrespondencia = document.getElementById('is_correspondencia').checked;
             const tipoCorrespondenciaDiv = document.getElementById('tipo_correspondencia_div');
-            if (isCorrespondencia) {
-                tipoCorrespondenciaDiv.style.display = 'block';
-            } else {
-                tipoCorrespondenciaDiv.style.display = 'none';
-            }
+            tipoCorrespondenciaDiv.style.display = isCorrespondencia ? 'block' : 'none';
         }
 
         function toggleSidebar() {
@@ -63,7 +142,7 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo">Administração de Condomínios</div>
+            <div class="logo">Residencial Costa Verde</div>
             <div class="user-info">
                 {% if usuario %}
                     <span>{{ usuario['nome'] }}</span>
@@ -82,6 +161,7 @@
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
             <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
+            <li><a href="{{ url_for('mensagens') }}"><i class="fas fa-envelope"></i> Mensagens</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
             <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
             <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
@@ -178,7 +258,8 @@
                                         <button onclick="showDeleteModal({{ aviso['id'] }}, 'aviso')" class="btn-delete">
                                             <i class="fas fa-trash"></i> Excluir
                                         </button>
-                                        <form id="delete-form-aviso-{{ aviso['id'] }}" method="POST" action="{{ url_for('delete_aviso', aviso_id=aviso['id']) }}" style="display: none;"></form>
+                                        <form id="delete-form-aviso-{{ aviso['id'] }}" method="POST" action="{{ url_for('delete_aviso', aviso_id=aviso['id']) }}" style="display: none;">
+                                        </form>
                                     </div>
                                     <div id="edit-form-aviso-{{ aviso['id'] }}" class="edit-form" style="display: none;">
                                         <form method="POST" action="{{ url_for('edit_aviso', aviso_id=aviso['id']) }}">
@@ -263,19 +344,19 @@
                                 </li>
                             {% endfor %}
                         {% else %}
-                            <li class="no-data">Nenhuma correspondência recebida pendente.</li>
+                            <p class="no-data">Nenhuma correspondência recebida pendente.</p>
                         {% endif %}
                     </ul>
                 </div>
             </section>
 
             <!-- Modal de Confirmação de Exclusão -->
-            <div id="delete-modal" class="modal" style="display: none;">
+            <div id="delete-modal" class="modal">
                 <div class="modal-content">
                     <h3>Confirmar Exclusão</h3>
                     <p>Tem certeza que deseja excluir este item?</p>
                     <div class="modal-actions">
-                        <button class="confirm-delete">Sim, Excluir</button>
+                        <button onclick="confirmDelete()" class="confirm-delete">Sim, Excluir</button>
                         <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
                     </div>
                 </div>
@@ -304,7 +385,7 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
+        <a href="{{ url_for('mensagens') }}" class="{% if request.endpoint == 'mensagens' %}active{% endif %}">
             <i class="fas fa-envelope"></i>
             <span>Mensagens</span>
         </a>
