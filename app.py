@@ -72,16 +72,13 @@ def get_db_connection():
         data_envio TEXT,
         status TEXT DEFAULT 'Enviada',
         data_lida TEXT,
+        lida INTEGER DEFAULT 0,
         FOREIGN KEY (remetente_id) REFERENCES usuarios (id),
         FOREIGN KEY (destinatario_id) REFERENCES usuarios (id)
     )
     ''')
     try:
-        cursor.execute('ALTER TABLE mensagens ADD COLUMN status TEXT DEFAULT "Enviada"')
-    except sqlite3.OperationalError:
-        pass  # Coluna já existe
-    try:
-        cursor.execute('ALTER TABLE mensagens ADD COLUMN data_lida TEXT')
+        cursor.execute('ALTER TABLE mensagens ADD COLUMN lida INTEGER DEFAULT 0')
     except sqlite3.OperationalError:
         pass  # Coluna já existe
     cursor.execute('''
@@ -133,11 +130,12 @@ def get_db_connection():
         descricao TEXT,
         data_recebimento TIMESTAMP,
         status TEXT DEFAULT 'Recebida',
+        lida INTEGER DEFAULT 0,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
     try:
-        cursor.execute('ALTER TABLE correspondencias ADD COLUMN status TEXT DEFAULT "Recebida"')
+        cursor.execute('ALTER TABLE correspondencias ADD COLUMN lida INTEGER DEFAULT 0')
     except sqlite3.OperationalError:
         pass  # Coluna já existe
     cursor.execute('''
@@ -165,14 +163,19 @@ def get_db_connection():
         tipo TEXT NOT NULL,
         descricao TEXT NOT NULL,
         data_criacao TIMESTAMP,
+        lida INTEGER DEFAULT 0,
         FOREIGN KEY (usuario_id) REFERENCES usuarios (id)
     )
     ''')
+    try:
+        cursor.execute('ALTER TABLE anuncios ADD COLUMN lida INTEGER DEFAULT 0')
+    except sqlite3.OperationalError:
+        pass  # Coluna já existe
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS forum_posts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER,
-        categoria TEXT NOT NULL,  -- Ex.: Eventos, Sugestões, Manutenção
+        categoria TEXT NOT NULL,
         titulo TEXT NOT NULL,
         mensagem TEXT NOT NULL,
         data_postagem TIMESTAMP,
@@ -202,15 +205,12 @@ def admin_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login'))
-
         conn = get_db_connection()
         user = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
         conn.close()
-
         if user['tipo_usuario'] != 'admin':
             flash('Acesso restrito a administradores.', 'error')
             return redirect(url_for('index'))
-
         return f(*args, **kwargs)
     return decorated_function
 
@@ -225,26 +225,24 @@ def index():
     mensagens = conn.execute('SELECT * FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" ORDER BY data_envio DESC',
                             (session['user_id'],)).fetchall()
     moradores = conn.execute('SELECT * FROM usuarios WHERE tipo_usuario = "usuario"').fetchall()
-    conn.close()
-    return render_template('index.html', usuario=usuario, avisos=avisos, mensagens=mensagens, moradores=moradores)
 
-@app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
-def delete_mensagem(mensagem_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+    # Contar itens não lidos
+    mensagens_nao_lidas = conn.execute('SELECT COUNT(*) FROM mensagens WHERE destinatario_id = ? AND status != "Excluída" AND lida = 0',
+                                       (session['user_id'],)).fetchone()[0]
+    anuncios_nao_lidos = conn.execute('SELECT COUNT(*) FROM anuncios WHERE lida = 0').fetchone()[0]
+    correspondencias_nao_lidas = conn.execute('SELECT COUNT(*) FROM correspondencias WHERE usuario_id = ? AND status = "Recebida" AND lida = 0',
+                                              (session['user_id'],)).fetchone()[0]
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ? AND destinatario_id = ?', 
-                (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id, session['user_id']))
-    if not cur.rowcount:
-        conn.close()
-        flash('Você não tem permissão para excluir esta mensagem!', 'error')
-        return redirect(url_for('index'))
-    conn.commit()
+    # Verificação para evitar divisão por zero no template
+    if not avisos:
+        avisos_limitados = []
+    else:
+        avisos_limitados = avisos[:3]  # Limita a 3 avisos no backend
+
     conn.close()
-    flash('Mensagem excluída com sucesso!', 'success')
-    return redirect(url_for('index'))
+    return render_template('index.html', usuario=usuario, avisos=avisos_limitados, mensagens=mensagens, moradores=moradores,
+                           mensagens_nao_lidas=mensagens_nao_lidas, anuncios_nao_lidos=anuncios_nao_lidos,
+                           correspondencias_nao_lidas=correspondencias_nao_lidas)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -267,27 +265,33 @@ def logout():
     session.pop('tipo_usuario', None)
     return redirect(url_for('login'))
 
-@app.route('/cadastro', methods=['GET', 'POST'])
-def cadastro():
+@app.route('/cadastro_moradores', methods=['GET', 'POST'])
+@admin_required
+def cadastro_moradores():
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
         senha = request.form['password']
+        rua = request.form.get('rua', '')
+        numero = request.form.get('numero', '')
+        garagem = request.form.get('garagem', '')
+        tipo_ocupacao = request.form.get('tipo_ocupacao', '')
         senha_hash = generate_password_hash(senha)
 
         conn = get_db_connection()
         try:
-            conn.execute('INSERT INTO usuarios (nome, email, senha_hash, tipo_usuario) VALUES (?, ?, ?, ?)',
-                         (nome, email, senha_hash, 'usuario'))
+            conn.execute('''INSERT INTO usuarios (nome, email, senha_hash, tipo_usuario, rua, numero, garagem, tipo_ocupacao)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                         (nome, email, senha_hash, 'usuario', rua, numero, garagem, tipo_ocupacao))
             conn.commit()
-            flash('Cadastro realizado com sucesso!', 'success')
-            return redirect(url_for('login'))
+            flash('Morador cadastrado com sucesso!', 'success')
+            return redirect(url_for('moradores'))
         except sqlite3.IntegrityError:
             flash('Email já cadastrado!', 'error')
         finally:
             conn.close()
 
-    return render_template('cadastro.html')
+    return render_template('cadastro_moradores.html')
 
 @app.route('/moradores')
 def moradores():
@@ -335,34 +339,6 @@ def excluir_morador(morador_id):
     flash('Morador excluído com sucesso!', 'success')
     return redirect(url_for('moradores'))
 
-@app.route('/cadastro_moradores', methods=['GET', 'POST'])
-@admin_required
-def cadastro_moradores():
-    if request.method == 'POST':
-        nome = request.form['nome']
-        email = request.form['email']
-        senha = request.form['password']
-        rua = request.form.get('rua', '')
-        numero = request.form.get('numero', '')
-        garagem = request.form.get('garagem', '')
-        tipo_ocupacao = request.form.get('tipo_ocupacao', '')
-        senha_hash = generate_password_hash(senha)
-
-        conn = get_db_connection()
-        try:
-            conn.execute('''INSERT INTO usuarios (nome, email, senha_hash, tipo_usuario, rua, numero, garagem, tipo_ocupacao)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                         (nome, email, senha_hash, 'usuario', rua, numero, garagem, tipo_ocupacao))
-            conn.commit()
-            flash('Morador cadastrado com sucesso!', 'success')
-            return redirect(url_for('admin'))
-        except sqlite3.IntegrityError:
-            flash('Email já cadastrado!', 'error')
-        finally:
-            conn.close()
-
-    return render_template('cadastro_moradores.html')
-
 @app.route('/reservas', methods=['GET', 'POST'])
 def reservas():
     if 'user_id' not in session:
@@ -404,9 +380,8 @@ def reservas():
         flash('Reserva feita com sucesso!', 'success')
 
     todas_reservas = conn.execute('SELECT r.*, u.nome AS usuario_nome FROM reservas r JOIN usuarios u ON r.usuario_id = u.id ORDER BY data_inicio DESC').fetchall()
-    reservas_usuario = conn.execute('SELECT * FROM reservas WHERE usuario_id = ? ORDER BY data_inicio DESC', (session['user_id'],)).fetchall()
     conn.close()
-    return render_template('reservas.html', todas_reservas=todas_reservas, reservas_usuario=reservas_usuario, tipo_usuario=usuario['tipo_usuario'])
+    return render_template('reservas.html', todas_reservas=todas_reservas, tipo_usuario=usuario['tipo_usuario'])
 
 @app.route('/editar_reserva/<int:reserva_id>', methods=['POST'])
 def editar_reserva(reserva_id):
@@ -417,7 +392,7 @@ def editar_reserva(reserva_id):
     cur = conn.cursor()
 
     reserva_atual = conn.execute('SELECT * FROM reservas WHERE id = ? AND usuario_id = ?', (reserva_id, session['user_id'])).fetchone()
-    if not reserva_atual:
+    if not reserva_atual and session.get('tipo_usuario') != 'admin':
         conn.close()
         flash('Você não tem permissão para editar esta reserva!', 'error')
         return redirect(url_for('reservas'))
@@ -448,8 +423,8 @@ def editar_reserva(reserva_id):
         return redirect(url_for('reservas'))
 
     cur.execute('''UPDATE reservas SET area_comum = ?, data_inicio = ?, data_fim = ? 
-                   WHERE id = ? AND usuario_id = ?''', 
-                   (area_comum, data_inicio_str, data_fim_str, reserva_id, session['user_id']))
+                   WHERE id = ?''', 
+                   (area_comum, data_inicio_str, data_fim_str, reserva_id))
     conn.commit()
     conn.close()
     flash('Reserva modificada com sucesso!', 'success')
@@ -464,23 +439,33 @@ def cancelar_reserva(reserva_id):
     cur = conn.cursor()
 
     reserva = conn.execute('SELECT * FROM reservas WHERE id = ? AND usuario_id = ?', (reserva_id, session['user_id'])).fetchone()
-    if not reserva:
+    if not reserva and session.get('tipo_usuario') != 'admin':
         conn.close()
         flash('Você não tem permissão para cancelar esta reserva!', 'error')
         return redirect(url_for('reservas'))
 
-    cur.execute('DELETE FROM reservas WHERE id = ? AND usuario_id = ?', (reserva_id, session['user_id']))
+    cur.execute('DELETE FROM reservas WHERE id = ?', (reserva_id,))
     conn.commit()
     conn.close()
     flash('Reserva cancelada com sucesso!', 'success')
     return redirect(url_for('reservas'))
 
-@app.route('/pagamentos')
+@app.route('/pagamentos', methods=['GET', 'POST'])
 def pagamentos():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
     conn = get_db_connection()
+    if request.method == 'POST':
+        usuario_id = request.form['usuario_id']
+        valor = float(request.form['valor'])
+        data_pagamento = request.form['data_pagamento']
+        cur = conn.cursor()
+        cur.execute('''INSERT INTO pagamentos (usuario_id, valor, data_pagamento)
+                       VALUES (?, ?, ?)''', (usuario_id, valor, data_pagamento))
+        conn.commit()
+        flash('Pagamento registrado com sucesso!', 'success')
+
     pagamentos = conn.execute('SELECT * FROM pagamentos WHERE usuario_id = ?', (session['user_id'],)).fetchall()
     conn.close()
     return render_template('pagamentos.html', pagamentos=pagamentos)
@@ -493,59 +478,85 @@ def comunicacao():
     correspondencias = conn.execute('SELECT c.*, u.nome AS usuario_nome FROM correspondencias c JOIN usuarios u ON c.usuario_id = u.id ORDER BY data_recebimento DESC').fetchall()
 
     if request.method == 'POST':
-        if 'titulo' in request.form:
-            tipo_comunicacao = request.form['tipo_comunicacao']
-            titulo = request.form['titulo']
+        cur = conn.cursor()
+        print("Form data received:", dict(request.form))  # Log para depuração
+        # Verifica exclusão de mensagem
+        if 'delete_mensagem_id' in request.form:
+            mensagem_id = request.form['delete_mensagem_id']
+            print(f"Tentando excluir mensagem ID: {mensagem_id}")  # Log adicional
+            mensagem = conn.execute('SELECT id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
+            if mensagem:
+                cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ?',
+                            (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id))
+                if cur.rowcount > 0:
+                    conn.commit()
+                    flash('Mensagem excluída com sucesso!', 'success')
+                    print(f"Mensagem ID {mensagem_id} excluída com sucesso")
+                else:
+                    conn.rollback()
+                    flash('Erro ao excluir a mensagem: nenhuma linha afetada!', 'error')
+                    print(f"Falha ao excluir mensagem ID {mensagem_id}: nenhuma linha afetada")
+            else:
+                flash('Mensagem não encontrada!', 'error')
+                print(f"Mensagem ID {mensagem_id} não encontrada")
+        # Verifica edição de mensagem
+        elif 'edit_mensagem_id' in request.form:
+            mensagem_id = request.form['edit_mensagem_id']
+            título = request.form['titulo']
             mensagem = request.form['mensagem']
             data_envio = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cur = conn.cursor()
-
+            print(f"Tentando editar mensagem ID: {mensagem_id}")  # Log adicional
+            mensagem_existente = conn.execute('SELECT id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
+            if mensagem_existente:
+                cur.execute('UPDATE mensagens SET titulo = ?, mensagem = ?, data_envio = ? WHERE id = ?',
+                            (título, mensagem, data_envio, mensagem_id))
+                if cur.rowcount > 0:
+                    conn.commit()
+                    flash('Mensagem editada com sucesso!', 'success')
+                    print(f"Mensagem ID {mensagem_id} editada com sucesso")
+                else:
+                    conn.rollback()
+                    flash('Erro ao editar a mensagem: nenhuma linha afetada!', 'error')
+                    print(f"Falha ao editar mensagem ID {mensagem_id}: nenhuma linha afetada")
+            else:
+                flash('Mensagem não encontrada!', 'error')
+                print(f"Mensagem ID {mensagem_id} não encontrada para edição")
+        # Verifica atualização de status de correspondência
+        elif 'status' in request.form:
+            correspondencia_id = request.form['correspondencia_id']
+            status = request.form['status']
+            correspondencia = conn.execute('SELECT usuario_id, tipo, data_recebimento FROM correspondencias WHERE id = ?', (correspondencia_id,)).fetchone()
+            if status == 'Entregue' and correspondencia:
+                mensagem_titulo = f"Chegada de Correspondência: {correspondencia['tipo']}"
+                cur.execute('''UPDATE mensagens 
+                               SET status = "Entregue", data_lida = ?, lida = 1
+                               WHERE destinatario_id = ? AND titulo = ? AND data_envio = ? AND status != "Excluída"''', 
+                            (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), correspondencia['usuario_id'], mensagem_titulo, correspondencia['data_recebimento']))
+                cur.execute('UPDATE correspondencias SET status = ?, lida = 1 WHERE id = ?', (status, correspondencia_id))
+                conn.commit()
+                flash('Correspondência marcada como entregue com sucesso!', 'success')
+        # Novo comunicado
+        elif 'titulo' in request.form:
+            tipo_comunicacao = request.form['tipo_comunicacao']
+            título = request.form['titulo']
+            mensagem = request.form['mensagem']
+            data_envio = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             if tipo_comunicacao == 'geral':
                 cur.execute('''INSERT INTO avisos (titulo, mensagem, data_envio)
-                                VALUES (?, ?, ?)''', (titulo, mensagem, data_envio))
+                                VALUES (?, ?, ?)''', (título, mensagem, data_envio))
                 conn.commit()
                 flash('Aviso geral enviado com sucesso!', 'success')
             elif tipo_comunicacao == 'especifico':
                 destinatario_id = request.form['destinatario_id']
                 is_correspondencia = request.form.get('is_correspondencia', 'off') == 'on'
                 tipo_correspondencia = request.form.get('tipo_correspondencia', None)
-                cur.execute('''INSERT INTO mensagens (remetente_id, destinatario_id, titulo, mensagem, data_envio, status)
-                                VALUES (?, ?, ?, ?, ?, ?)''', (session['user_id'], destinatario_id, titulo, mensagem, data_envio, 'Enviada'))
+                cur.execute('''INSERT INTO mensagens (remetente_id, destinatario_id, titulo, mensagem, data_envio, status, lida)
+                                VALUES (?, ?, ?, ?, ?, ?, 0)''', (session['user_id'], destinatario_id, título, mensagem, data_envio, 'Enviada'))
                 if is_correspondencia and tipo_correspondencia:
-                    cur.execute('''INSERT INTO correspondencias (usuario_id, tipo, descricao, data_recebimento, status)
-                                    VALUES (?, ?, ?, ?, ?)''', (destinatario_id, tipo_correspondencia, mensagem, data_envio, 'Recebida'))
+                    cur.execute('''INSERT INTO correspondencias (usuario_id, tipo, descricao, data_recebimento, status, lida)
+                                    VALUES (?, ?, ?, ?, ?, 0)''', (destinatario_id, tipo_correspondencia, mensagem, data_envio, 'Recebida'))
                 conn.commit()
                 flash('Mensagem enviada com sucesso!' + (' Correspondência registrada!' if is_correspondencia else ''), 'success')
-        elif 'delete_mensagem_id' in request.form:
-            mensagem_id = request.form['delete_mensagem_id']
-            cur = conn.cursor()
-            cur.execute('UPDATE mensagens SET status = "Excluída" WHERE id = ?', (mensagem_id,))
-            conn.commit()
-            flash('Mensagem excluída com sucesso!', 'success')
-        elif 'edit_mensagem_id' in request.form:
-            mensagem_id = request.form['edit_mensagem_id']
-            titulo = request.form['titulo']
-            mensagem = request.form['mensagem']
-            data_envio = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            cur = conn.cursor()
-            cur.execute('UPDATE mensagens SET titulo = ?, mensagem = ?, data_envio = ? WHERE id = ?',
-                        (titulo, mensagem, data_envio, mensagem_id))
-            conn.commit()
-            flash('Mensagem editada com sucesso!', 'success')
-        elif 'status' in request.form:
-            correspondencia_id = request.form['correspondencia_id']
-            status = request.form['status']
-            cur = conn.cursor()
-            correspondencia = conn.execute('SELECT usuario_id, tipo, data_recebimento FROM correspondencias WHERE id = ?', (correspondencia_id,)).fetchone()
-            if status == 'Entregue' and correspondencia:
-                mensagem_titulo = f"Chegada de Correspondência: {correspondencia['tipo']}"
-                cur.execute('''UPDATE mensagens 
-                               SET status = "Entregue", data_lida = ?
-                               WHERE destinatario_id = ? AND titulo = ? AND data_envio = ? AND status != "Excluída"''', 
-                            (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), correspondencia['usuario_id'], mensagem_titulo, correspondencia['data_recebimento']))
-                cur.execute('UPDATE correspondencias SET status = ? WHERE id = ?', (status, correspondencia_id))
-                conn.commit()
-                flash('Correspondência marcada como entregue com sucesso!', 'success')
 
         conn.close()
         return redirect(url_for('comunicacao'))
@@ -559,11 +570,11 @@ def comunicacao():
 @admin_required
 def edit_aviso(aviso_id):
     conn = get_db_connection()
-    titulo = request.form['titulo']
+    título = request.form['titulo']
     mensagem = request.form['mensagem']
     data_envio = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     conn.execute('''UPDATE avisos SET titulo = ?, mensagem = ?, data_envio = ? WHERE id = ?''',
-                 (titulo, mensagem, data_envio, aviso_id))
+                 (título, mensagem, data_envio, aviso_id))
     conn.commit()
     conn.close()
     flash('Aviso editado com sucesso!', 'success')
@@ -573,11 +584,79 @@ def edit_aviso(aviso_id):
 @admin_required
 def delete_aviso(aviso_id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM avisos WHERE id = ?', (aviso_id,))
-    conn.commit()
+    cur = conn.cursor()
+    print(f"Tentando excluir aviso ID: {aviso_id}")  # Log para depuração
+    aviso = conn.execute('SELECT id FROM avisos WHERE id = ?', (aviso_id,)).fetchone()
+    if aviso:
+        cur.execute('DELETE FROM avisos WHERE id = ?', (aviso_id,))
+        if cur.rowcount > 0:
+            conn.commit()
+            flash('Aviso excluído com sucesso!', 'success')
+            print(f"Aviso ID {aviso_id} excluído com sucesso")
+        else:
+            conn.rollback()
+            flash('Erro ao excluir o aviso: nenhuma linha afetada!', 'error')
+            print(f"Falha ao excluir aviso ID {aviso_id}: nenhuma linha afetada")
+    else:
+        flash('Aviso não encontrado!', 'error')
+        print(f"Aviso ID {aviso_id} não encontrado")
     conn.close()
-    flash('Aviso excluído com sucesso!', 'success')
     return redirect(url_for('comunicacao'))
+
+@app.route('/mensagens', methods=['GET', 'POST'])
+def mensagens():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
+
+    if request.method == 'POST' and 'delete_mensagem_id' in request.form:
+        mensagem_id = request.form['delete_mensagem_id']
+        mensagem = conn.execute('SELECT destinatario_id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
+        if mensagem and (mensagem['destinatario_id'] == session['user_id'] or usuario['tipo_usuario'] == 'admin'):
+            cur = conn.cursor()
+            cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ?',
+                        (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id))
+            conn.commit()
+            flash('Mensagem excluída com sucesso!', 'success')
+        else:
+            flash('Você não tem permissão para excluir esta mensagem!', 'error')
+        conn.close()
+        return redirect(url_for('mensagens'))
+
+    # Marcar mensagens como lidas
+    cur = conn.cursor()
+    cur.execute('UPDATE mensagens SET lida = 1 WHERE destinatario_id = ? AND status != "Excluída" AND lida = 0',
+                (session['user_id'],))
+    conn.commit()
+
+    mensagens = conn.execute('SELECT m.*, u.nome AS remetente_nome FROM mensagens m JOIN usuarios u ON m.remetente_id = u.id WHERE m.destinatario_id = ? AND m.status != "Excluída" ORDER BY data_envio DESC',
+                             (session['user_id'],)).fetchall()
+    conn.close()
+    return render_template('mensagens.html', mensagens=mensagens, usuario=usuario)
+
+@app.route('/delete_mensagem/<int:mensagem_id>', methods=['POST'])
+def delete_mensagem(mensagem_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    mensagem = conn.execute('SELECT destinatario_id FROM mensagens WHERE id = ?', (mensagem_id,)).fetchone()
+    if mensagem and mensagem['destinatario_id'] == session['user_id']:
+        cur.execute('UPDATE mensagens SET status = "Excluída", data_lida = ? WHERE id = ? AND destinatario_id = ?', 
+                    (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), mensagem_id, session['user_id']))
+        if not cur.rowcount:
+            conn.close()
+            flash('Você não tem permissão para excluir esta mensagem!', 'error')
+            return redirect(url_for('mensagens'))
+        conn.commit()
+        flash('Mensagem excluída com sucesso!', 'success')
+    else:
+        flash('Você não tem permissão para excluir esta mensagem!', 'error')
+    conn.close()
+    return redirect(url_for('mensagens'))
 
 @app.route('/perfil', methods=['GET', 'POST'])
 def perfil():
@@ -687,7 +766,7 @@ def feedback():
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
     if request.method == 'POST':
-        if 'tipo' in request.form and 'mensagem' in request.form:  # Envio de novo feedback
+        if 'tipo' in request.form and 'mensagem' in request.form:
             tipo = request.form['tipo']
             mensagem = request.form['mensagem']
             data_envio = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -696,7 +775,7 @@ def feedback():
                             VALUES (?, ?, ?, ?)''', (session['user_id'], tipo, mensagem, data_envio))
             conn.commit()
             flash('Feedback enviado com sucesso!', 'success')
-        elif 'resposta_admin' in request.form:  # Resposta do administrador
+        elif 'resposta_admin' in request.form:
             if usuario['tipo_usuario'] != 'admin':
                 flash('Apenas administradores podem responder feedbacks!', 'error')
             else:
@@ -708,7 +787,7 @@ def feedback():
                                WHERE id = ?''', (resposta_admin, data_resposta, feedback_id))
                 conn.commit()
                 flash('Resposta enviada com sucesso!', 'success')
-        elif 'classificacao_usuario' in request.form:  # Classificação e resolução do usuário
+        elif 'classificacao_usuario' in request.form:
             feedback_id = request.form['feedback_id']
             feedback = conn.execute('SELECT usuario_id FROM feedbacks WHERE id = ?', (feedback_id,)).fetchone()
             if feedback['usuario_id'] != session['user_id']:
@@ -721,7 +800,7 @@ def feedback():
                                WHERE id = ?''', (classificacao_usuario, resolvido_usuario, feedback_id))
                 conn.commit()
                 flash('Classificação registrada com sucesso!', 'success')
-        elif 'delete_feedback_id' in request.form:  # Exclusão do feedback pelo administrador
+        elif 'delete_feedback_id' in request.form:
             if usuario['tipo_usuario'] != 'admin':
                 flash('Apenas administradores podem excluir feedbacks!', 'error')
             else:
@@ -747,9 +826,14 @@ def correspondencias():
     conn = get_db_connection()
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
+    # Marcar correspondências como lidas ao visualizar
+    cur = conn.cursor()
     if usuario['tipo_usuario'] == 'admin':
         correspondencias = conn.execute('SELECT c.*, u.nome AS usuario_nome FROM correspondencias c JOIN usuarios u ON c.usuario_id = u.id ORDER BY data_recebimento DESC').fetchall()
     else:
+        cur.execute('UPDATE correspondencias SET lida = 1 WHERE usuario_id = ? AND status = "Recebida" AND lida = 0',
+                    (session['user_id'],))
+        conn.commit()
         correspondencias = conn.execute('SELECT * FROM correspondencias WHERE usuario_id = ? ORDER BY data_recebimento DESC', (session['user_id'],)).fetchall()
 
     conn.close()
@@ -776,23 +860,9 @@ def estacionamento():
     conn.close()
     return render_template('estacionamento.html', veiculos=veiculos)
 
-@app.route('/emergencias', methods=['GET', 'POST'])
+@app.route('/emergencias')
 @admin_required
 def emergencias():
-    if request.method == 'POST':
-        conn = get_db_connection()
-        titulo = request.form['titulo']
-        procedimento = request.form['procedimento']
-        contatos = request.form['contatos']
-
-        cur = conn.cursor()
-        cur.execute('''INSERT INTO emergencias (titulo, procedimento, contatos)
-                        VALUES (?, ?, ?)''', (titulo, procedimento, contatos))
-        conn.commit()
-        conn.close()
-        flash('Informação de emergência adicionada com sucesso!', 'success')
-        return redirect(url_for('emergencias'))
-
     conn = get_db_connection()
     emergencias = conn.execute('SELECT * FROM emergencias').fetchall()
     conn.close()
@@ -807,16 +877,16 @@ def anuncios():
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
     if request.method == 'POST':
-        if 'tipo' in request.form and 'descricao' in request.form:  # Criar novo anúncio
+        if 'tipo' in request.form and 'descricao' in request.form:
             tipo = request.form['tipo']
             descricao = request.form['descricao']
             data_criacao = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cur = conn.cursor()
-            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, descricao, data_criacao)
-                            VALUES (?, ?, ?, ?)''', (session['user_id'], tipo, descricao, data_criacao))
+            cur.execute('''INSERT INTO anuncios (usuario_id, tipo, descricao, data_criacao, lida)
+                            VALUES (?, ?, ?, ?, 0)''', (session['user_id'], tipo, descricao, data_criacao))
             conn.commit()
             flash('Anúncio criado com sucesso!', 'success')
-        elif 'delete_anuncio_id' in request.form:  # Excluir anúncio
+        elif 'delete_anuncio_id' in request.form:
             anuncio_id = request.form['delete_anuncio_id']
             anuncio = conn.execute('SELECT usuario_id FROM anuncios WHERE id = ?', (anuncio_id,)).fetchone()
             if anuncio['usuario_id'] != session['user_id']:
@@ -826,6 +896,11 @@ def anuncios():
                 cur.execute('DELETE FROM anuncios WHERE id = ? AND usuario_id = ?', (anuncio_id, session['user_id'],))
                 conn.commit()
                 flash('Anúncio excluído com sucesso!', 'success')
+
+    # Marcar anúncios como lidos ao visualizar
+    cur = conn.cursor()
+    cur.execute('UPDATE anuncios SET lida = 1 WHERE lida = 0')
+    conn.commit()
 
     anuncios = conn.execute('SELECT a.*, u.nome AS usuario_nome FROM anuncios a JOIN usuarios u ON a.usuario_id = u.id ORDER BY data_criacao DESC').fetchall()
     conn.close()
@@ -840,17 +915,17 @@ def forum():
     usuario = conn.execute('SELECT tipo_usuario FROM usuarios WHERE id = ?', (session['user_id'],)).fetchone()
 
     if request.method == 'POST':
-        if 'titulo' in request.form and 'mensagem' in request.form:  # Criar nova postagem
+        if 'titulo' in request.form and 'mensagem' in request.form:
             categoria = request.form['categoria']
-            titulo = request.form['titulo']
+            título = request.form['titulo']
             mensagem = request.form['mensagem']
             data_postagem = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             cur = conn.cursor()
             cur.execute('''INSERT INTO forum_posts (usuario_id, categoria, titulo, mensagem, data_postagem)
-                            VALUES (?, ?, ?, ?, ?)''', (session['user_id'], categoria, titulo, mensagem, data_postagem))
+                            VALUES (?, ?, ?, ?, ?)''', (session['user_id'], categoria, título, mensagem, data_postagem))
             conn.commit()
             flash('Postagem criada com sucesso!', 'success')
-        elif 'resposta_mensagem' in request.form:  # Criar resposta
+        elif 'resposta_mensagem' in request.form:
             post_id = request.form['post_id']
             mensagem = request.form['resposta_mensagem']
             data_resposta = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -859,19 +934,18 @@ def forum():
                             VALUES (?, ?, ?, ?)''', (post_id, session['user_id'], mensagem, data_resposta))
             conn.commit()
             flash('Resposta enviada com sucesso!', 'success')
-        elif 'delete_post_id' in request.form:  # Excluir postagem
+        elif 'delete_post_id' in request.form:
             post_id = request.form['delete_post_id']
             post = conn.execute('SELECT usuario_id FROM forum_posts WHERE id = ?', (post_id,)).fetchone()
             if post['usuario_id'] != session['user_id']:
                 flash('Você não tem permissão para excluir esta postagem!', 'error')
             else:
                 cur = conn.cursor()
-                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))  # Exclui respostas primeiro
+                cur.execute('DELETE FROM forum_respostas WHERE post_id = ?', (post_id,))
                 cur.execute('DELETE FROM forum_posts WHERE id = ? AND usuario_id = ?', (post_id, session['user_id'],))
                 conn.commit()
                 flash('Postagem excluída com sucesso!', 'success')
 
-    # Busca postagens e respostas
     categoria_filtro = request.args.get('categoria', '')
     if categoria_filtro:
         posts = conn.execute('SELECT p.*, u.nome AS usuario_nome FROM forum_posts p JOIN usuarios u ON p.usuario_id = u.id WHERE p.categoria = ? ORDER BY data_postagem DESC', (categoria_filtro,)).fetchall()
@@ -885,11 +959,6 @@ def forum():
 
     conn.close()
     return render_template('forum.html', posts_com_respostas=posts_com_respostas, usuario=usuario, categoria_filtro=categoria_filtro)
-
-@app.route('/admin')
-@admin_required
-def admin():
-    return render_template('admin.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
