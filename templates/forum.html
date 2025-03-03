@@ -3,96 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fórum - Administração de Condomínios</title>
+    <title>Painel de Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
     <style>
-        /* Estilo do Modal Moderno (copiado da página Comunicação) */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-content h3 {
-            margin: 0 0 15px;
-            color: #333;
-            font-size: 1.5em;
-        }
-
-        .modal-content p {
-            margin: 0 0 20px;
-            color: #666;
-            font-size: 1em;
-        }
-
-        .modal-actions {
+        /* Ajustes para o cabeçalho */
+        .navbar {
             display: flex;
-            justify-content: space-around;
-        }
-
-        .confirm-delete, .cancel-modal {
+            justify-content: space-between;
+            align-items: center;
             padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-
-        .confirm-delete {
-            background-color: #e74c3c;
+            background-color: #2c3e50; /* Cor de fundo padrão, ajuste conforme seu style.css */
             color: white;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        .confirm-delete:hover {
-            background-color: #c0392b;
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
         }
 
-        .cancel-modal {
-            background-color: #ccc;
-            color: #333;
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            flex-grow: 1;
+            text-align: center;
         }
 
-        .cancel-modal:hover {
-            background-color: #bbb;
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Espaço entre o nome e o ícone */
+            white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+        }
+
+        .user-info span {
+            font-size: 1em;
+        }
+
+        .logout-icon {
+            color: white;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .logout-icon:hover {
+            color: #ddd; /* Cor ao passar o mouse, ajuste conforme necessário */
+        }
+
+        /* Ajuste para o conteúdo principal não sobrepor o cabeçalho */
+        main {
+            margin-top: 60px; /* Altura aproximada do cabeçalho, ajuste conforme necessário */
         }
     </style>
     <script>
-        function showDeleteModal(postId) {
-            const modal = document.getElementById('delete-modal');
-            const form = document.getElementById('delete-form-' + postId);
-            modal.style.display = 'flex';
-            document.getElementById('confirm-delete-btn').onclick = function() {
-                form.submit();
-            };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
+            authDomain: "appcondominio-2fcac.firebaseapp.com",
+            projectId: "appcondominio-2fcac",
+            storageBucket: "appcondominio-2fcac.appspot.com",
+            messagingSenderId: "454281232654",
+            appId: "1:454281232654:web:647583086f3d4ed730175f",
+            measurementId: "G-SN7T6D7FTE"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        function registerPush() {
+            messaging.requestPermission()
+                .then(() => messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }))
+                .then((token) => {
+                    console.log('Token FCM:', token);
+                    fetch('/register_token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    }).then(response => response.text())
+                      .then(text => console.log('Token registrado:', text))
+                      .catch(err => console.error('Erro ao enviar token:', err));
+                })
+                .catch((err) => console.error('Erro ao registrar push:', err));
         }
-        function hideDeleteModal() {
-            document.getElementById('delete-modal').style.display = 'none';
+
+        messaging.onMessage((payload) => {
+            console.log('Notificação recebida em foreground:', payload);
+            const notification = new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/static/icon.png'
+            });
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then((reg) => {
+                    console.log('Service Worker registrado', reg);
+                    registerPush();
+                })
+                .catch((err) => console.error('Erro ao registrar Service Worker', err));
         }
+
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
@@ -106,7 +126,7 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo">Administração de Condomínios</div>
+            <div class="logo">Residencial Costa Verde</div>
             <div class="user-info">
                 {% if usuario %}
                     <span>{{ usuario['nome'] }}</span>
@@ -119,16 +139,10 @@
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
-            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
-            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
-            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
-            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
-            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
-            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -141,113 +155,69 @@
     </nav>
 
     <!-- Conteúdo Principal -->
-    <main class="forum-page">
+    <main>
         <section class="hero">
-            <h1 class="animate-text">Fórum da Comunidade</h1>
+            <h1 class="animate-text">
+                {% if usuario %}
+                    Bem-vindo, {{ usuario['nome'] }}!
+                {% else %}
+                    Bem-vindo ao Sistema!
+                {% endif %}
+            </h1>
         </section>
-        <div class="content">
-            <div class="form-container">
-                <h2>Criar Nova Postagem</h2>
-                <form method="POST" action="{{ url_for('forum') }}">
-                    <div class="form-group">
-                        <label for="categoria"><i class="fas fa-list"></i> Categoria:</label>
-                        <select name="categoria" id="categoria" required>
-                            <option value="Eventos">Eventos</option>
-                            <option value="Sugestões">Sugestões</option>
-                            <option value="Manutenção">Manutenção</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="titulo"><i class="fas fa-heading"></i> Título:</label>
-                        <input type="text" name="titulo" id="titulo" required placeholder="Digite o título da postagem">
-                    </div>
-                    <div class="form-group">
-                        <label for="mensagem"><i class="fas fa-comment-alt"></i> Mensagem:</label>
-                        <textarea name="mensagem" id="mensagem" required placeholder="Escreva sua mensagem aqui"></textarea>
-                    </div>
-                    <input type="submit" value="Publicar Postagem" class="btn-login">
-                </form>
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <div class="flash-messages">
-                            {% for message in messages %}
-                                <p>{{ message }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-            </div>
-            <div class="forum-list-container">
-                <h2>Postagens do Fórum</h2>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label for="filtro-categoria"><i class="fas fa-filter"></i> Filtrar por Categoria:</label>
-                    <select id="filtro-categoria" onchange="window.location.href='{{ url_for('forum') }}?categoria=' + this.value;">
-                        <option value="">Todas</option>
-                        <option value="Eventos" {% if categoria_filtro == 'Eventos' %}selected{% endif %}>Eventos</option>
-                        <option value="Sugestões" {% if categoria_filtro == 'Sugestões' %}selected{% endif %}>Sugestões</option>
-                        <option value="Manutenção" {% if categoria_filtro == 'Manutenção' %}selected{% endif %}>Manutenção</option>
-                        <option value="Outros" {% if categoria_filtro == 'Outros' %}selected{% endif %}>Outros</option>
-                    </select>
-                </div>
-                {% if posts_com_respostas|length > 0 %}
-                    <ul class="forum-list">
-                        {% for post, respostas in posts_com_respostas %}
+
+        <!-- Comunicados -->
+        <section class="comunicados">
+            <h2>Comunicados</h2>
+            <div class="avisos">
+                {% if avisos|length > 0 %}
+                    <ul>
+                        {% for aviso in avisos %}
                             <li>
-                                <strong>Categoria:</strong> {{ post['categoria'] }}<br>
-                                <strong>Título:</strong> {{ post['titulo'] }}<br>
-                                <strong>Autor:</strong> {{ post['usuario_nome'] }}<br>
-                                <strong>Mensagem:</strong> {{ post['mensagem'] }}<br>
-                                <strong>Data:</strong> {{ post['data_postagem'] }}<br>
-                                {% if post['usuario_id'] == session['user_id'] %}
-                                    <form method="POST" action="{{ url_for('forum') }}" style="display: inline;" id="delete-form-{{ post['id'] }}">
-                                        <input type="hidden" name="delete_post_id" value="{{ post['id'] }}">
-                                        <button type="button" class="btn-delete" onclick="showDeleteModal({{ post['id'] }})">
-                                            <i class="fas fa-trash"></i> Excluir
-                                        </button>
-                                    </form>
-                                {% endif %}
-                                <div class="respostas">
-                                    <h4>Respostas:</h4>
-                                    {% if respostas|length > 0 %}
-                                        {% for resposta in respostas %}
-                                            <div class="resposta">
-                                                <strong>{{ resposta['usuario_nome'] }}:</strong> {{ resposta['mensagem'] }}<br>
-                                                <strong>Data:</strong> {{ resposta['data_resposta'] }}
-                                            </div>
-                                        {% endfor %}
-                                    {% else %}
-                                        <p>Sem respostas ainda.</p>
-                                    {% endif %}
-                                    <form method="POST" action="{{ url_for('forum') }}">
-                                        <input type="hidden" name="post_id" value="{{ post['id'] }}">
-                                        <div class="form-group">
-                                            <label for="resposta_mensagem_{{ post['id'] }}"><i class="fas fa-comment-alt"></i> Responder:</label>
-                                            <textarea name="resposta_mensagem" id="resposta_mensagem_{{ post['id'] }}" required placeholder="Escreva sua resposta"></textarea>
-                                        </div>
-                                        <input type="submit" value="Responder" class="btn-login">
-                                    </form>
-                                </div>
+                                <strong>{{ aviso['titulo'] }}</strong> - {{ aviso['data_envio'] }}<br>
+                                <p>{{ aviso['mensagem']|truncate(100) }}</p>
                             </li>
                         {% endfor %}
                     </ul>
+                    {% if avisos|length > 3 %}
+                        <a href="{{ url_for('comunicacao') }}" class="see-more">Ver mais</a>
+                    {% endif %}
                 {% else %}
-                    <p class="no-data">Nenhuma postagem registrada ainda nesta categoria.</p>
+                    <p>Nenhum aviso no momento.</p>
                 {% endif %}
             </div>
-        </div>
+        </section>
 
-        <!-- Modal de Confirmação de Exclusão -->
-        <div id="delete-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Confirmar Exclusão</h3>
-                <p>Tem certeza que deseja excluir esta postagem?</p>
-                <div class="modal-actions">
-                    <button id="confirm-delete-btn" class="confirm-delete">Sim, Excluir</button>
-                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+        <!-- Recursos Rápidos -->
+        <section class="features">
+            <a href="{{ url_for('perfil') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-user feature-icon"></i>
+                    <h3>Perfil</h3>
                 </div>
-            </div>
-        </div>
+            </a>
+            <a href="{{ url_for('moradores') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-users feature-icon"></i>
+                    <h3>Moradores</h3>
+                </div>
+            </a>
+            <a href="{{ url_for('forum') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-comment-dots feature-icon"></i>
+                    <h3>Fórum</h3>
+                </div>
+            </a>
+            <a href="{{ url_for('mensagens') }}" class="feature-link">
+                <div class="feature">
+                    <i class="fas fa-comment-alt feature-icon"></i>
+                    {% if mensagens_nao_lidas > 0 %}
+                        <span class="badge">{{ mensagens_nao_lidas }}</span>
+                    {% endif %}
+                    <h3>Mensagens</h3>
+                </div>
+            </a>
+        </section>
     </main>
 
     <!-- Barra Inferior -->
@@ -258,15 +228,21 @@
         </a>
         <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
             <i class="fas fa-bullhorn"></i>
+            {% if anuncios_nao_lidos > 0 %}
+                <span class="badge">{{ anuncios_nao_lidos }}</span>
+            {% endif %}
             <span>Anúncios</span>
         </a>
         <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
-            <i class="fas fa-envelope"></i>
-            <span>Mensagens</span>
+        <a href="{{ url_for('correspondencias') }}" class="{% if request.endpoint == 'correspondencias' %}active{% endif %}">
+            <i class="fas fa-mail-bulk"></i>
+            {% if correspondencias_nao_lidas > 0 %}
+                <span class="badge">{{ correspondencias_nao_lidas }}</span>
+            {% endif %}
+            <span>Correspondências</span>
         </a>
     </nav>
 </body>
