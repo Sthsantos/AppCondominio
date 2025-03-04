@@ -3,13 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergências - Administração de Condomínios</title>
+    <title>Emergências - Residencial Costa Verde</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
+    <style>
+        /* Ajustes para o cabeçalho */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2c3e50;
+            color: white;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .user-info span {
+            font-size: 1em;
+        }
+
+        .logout-icon {
+            color: white;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .logout-icon:hover {
+            color: #ddd;
+        }
+
+        /* Ajuste para o conteúdo principal não sobrepor o cabeçalho */
+        main {
+            margin-top: 60px;
+        }
+
+        /* Estilo do Modal Moderno */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-content h3 {
+            margin: 0 0 15px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .modal-content p {
+            margin: 0 0 20px;
+            color: #666;
+            font-size: 1em;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .confirm-delete, .cancel-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .confirm-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .cancel-modal {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .cancel-modal:hover {
+            background-color: #bbb;
+        }
+
+        /* Estilo para Emergências */
+        .emergencias-list li {
+            border-left: 5px solid #e74c3c;
+            padding-left: 10px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .emergencia-actions {
+            margin-top: 10px;
+        }
+
+        .edit-form {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
+            authDomain: "appcondominio-2fcac.firebaseapp.com",
+            projectId: "appcondominio-2fcac",
+            storageBucket: "appcondominio-2fcac.appspot.com",
+            messagingSenderId: "454281232654",
+            appId: "1:454281232654:web:647583086f3d4ed730175f",
+            measurementId: "G-SN7T6D7FTE"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        function registerPush() {
+            messaging.requestPermission()
+                .then(() => messaging.getToken({ vapidKey: "SUBSTITUA_PELO_VAPID_KEY" }))
+                .then((token) => {
+                    console.log('Token FCM:', token);
+                    fetch('/register_token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: token })
+                    }).then(response => response.text())
+                      .then(text => console.log('Token registrado:', text))
+                      .catch(err => console.error('Erro ao enviar token:', err));
+                })
+                .catch((err) => console.error('Erro ao registrar push:', err));
+        }
+
+        messaging.onMessage((payload) => {
+            console.log('Notificação recebida em foreground:', payload);
+            const notification = new Notification(payload.notification.title, {
+                body: payload.notification.body,
+                icon: '/static/icon.png'
+            });
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js')
+                .then((reg) => {
+                    console.log('Service Worker registrado', reg);
+                    registerPush();
+                })
+                .catch((err) => console.error('Erro ao registrar Service Worker', err));
+        }
+
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
+        }
+
+        function toggleEditForm(emergenciaId) {
+            const form = document.getElementById('edit-form-' + emergenciaId);
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+        }
+
+        function showDeleteModal(emergenciaId) {
+            const modal = document.getElementById('delete-modal');
+            const form = document.getElementById('delete-form-' + emergenciaId);
+            modal.style.display = 'flex';
+            document.getElementById('confirm-delete-btn').onclick = function() {
+                form.submit();
+            };
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+
+        function searchEmergencias() {
+            const input = document.getElementById('search-input').value.toLowerCase();
+            const items = document.querySelectorAll('.emergencias-list li');
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(input) ? '' : 'none';
+            });
         }
     </script>
 </head>
@@ -20,7 +248,7 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo">Administração de Condomínios</div>
+            <div class="logo">Residencial Costa Verde</div>
             <div class="user-info">
                 {% if usuario %}
                     <span>{{ usuario['nome'] }}</span>
@@ -33,21 +261,15 @@
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
-            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
-            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
-            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
-            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
-            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
-            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
                 <li><a href="{{ url_for('estacionamento') }}"><i class="fas fa-car"></i> Estacionamento</a></li>
-                <li><a href="{{ url_for('emergencias') }}"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
+                <li><a href="{{ url_for('emergencias') }}" class="active"><i class="fas fa-exclamation-triangle"></i> Emergências</a></li>
                 <li><a href="{{ url_for('cadastro_moradores') }}"><i class="fas fa-user-plus"></i> Cadastro de Moradores</a></li>
             {% endif %}
             <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
@@ -55,26 +277,95 @@
     </nav>
 
     <!-- Conteúdo Principal -->
-    <main class="emergencias-page">
+    <main>
         <section class="hero">
             <h1 class="animate-text">Procedimentos de Emergência</h1>
         </section>
         <div class="content">
+            <div class="form-container">
+                <h2>Adicionar Procedimento de Emergência</h2>
+                <form method="POST" action="{{ url_for('emergencias') }}">
+                    <div class="form-group">
+                        <label for="titulo"><i class="fas fa-exclamation-triangle"></i> Título:</label>
+                        <input type="text" name="titulo" id="titulo" required placeholder="Ex.: Incêndio">
+                    </div>
+                    <div class="form-group">
+                        <label for="procedimento"><i class="fas fa-list-ul"></i> Procedimento:</label>
+                        <textarea name="procedimento" id="procedimento" required placeholder="Descreva os passos a seguir"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="contatos"><i class="fas fa-phone"></i> Contatos:</label>
+                        <textarea name="contatos" id="contatos" required placeholder="Ex.: Bombeiros: 193, Síndico: (11) 99999-9999"></textarea>
+                    </div>
+                    <input type="submit" value="Adicionar Procedimento" class="btn-login">
+                </form>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
             <div class="emergencias-list-container">
                 <h2>Lista de Emergências</h2>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="search-input"><i class="fas fa-search"></i> Pesquisar:</label>
+                    <input type="text" id="search-input" onkeyup="searchEmergencias()" placeholder="Digite para buscar...">
+                </div>
                 <ul class="emergencias-list">
                     {% if emergencias|length > 0 %}
                         {% for emergencia in emergencias %}
                             <li>
-                                <h3>{{ emergencia['titulo'] }}</h3>
+                                <h3><i class="fas fa-exclamation-triangle"></i> {{ emergencia['titulo'] }}</h3>
                                 <p><strong>Procedimento:</strong> {{ emergencia['procedimento'] }}</p>
                                 <p><strong>Contatos:</strong> {{ emergencia['contatos'] }}</p>
+                                <div class="emergencia-actions">
+                                    <button onclick="toggleEditForm({{ emergencia['id'] }})" class="btn-edit">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <form method="POST" action="{{ url_for('excluir_emergencia', emergencia_id=emergencia['id']) }}" style="display: inline;" id="delete-form-{{ emergencia['id'] }}">
+                                        <button type="button" class="btn-delete" onclick="showDeleteModal({{ emergencia['id'] }})">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </button>
+                                    </form>
+                                </div>
+                                <div id="edit-form-{{ emergencia['id'] }}" class="edit-form" style="display: none;">
+                                    <form method="POST" action="{{ url_for('editar_emergencia', emergencia_id=emergencia['id']) }}">
+                                        <div class="form-group">
+                                            <label for="titulo_{{ emergencia['id'] }}"><i class="fas fa-exclamation-triangle"></i> Título:</label>
+                                            <input type="text" name="titulo" id="titulo_{{ emergencia['id'] }}" value="{{ emergencia['titulo'] }}" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="procedimento_{{ emergencia['id'] }}"><i class="fas fa-list-ul"></i> Procedimento:</label>
+                                            <textarea name="procedimento" id="procedimento_{{ emergencia['id'] }}" required>{{ emergencia['procedimento'] }}</textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="contatos_{{ emergencia['id'] }}"><i class="fas fa-phone"></i> Contatos:</label>
+                                            <textarea name="contatos" id="contatos_{{ emergencia['id'] }}" required>{{ emergencia['contatos'] }}</textarea>
+                                        </div>
+                                        <input type="submit" value="Salvar Alterações" class="btn-login">
+                                    </form>
+                                </div>
                             </li>
                         {% endfor %}
                     {% else %}
                         <li class="no-data">Nenhum procedimento de emergência registrado.</li>
                     {% endif %}
                 </ul>
+            </div>
+        </div>
+        <!-- Modal de Confirmação de Exclusão -->
+        <div id="delete-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Confirmar Exclusão</h3>
+                <p>Tem certeza que deseja excluir este procedimento?</p>
+                <div class="modal-actions">
+                    <button id="confirm-delete-btn" class="confirm-delete">Sim, Excluir</button>
+                    <button onclick="hideDeleteModal()" class="cancel-modal">Não</button>
+                </div>
             </div>
         </div>
     </main>
@@ -93,9 +384,9 @@
             <i class="fas fa-calendar-alt"></i>
             <span>Reservas</span>
         </a>
-        <a href="{{ url_for('comunicacao') }}" class="{% if request.endpoint == 'comunicacao' %}active{% endif %}">
-            <i class="fas fa-envelope"></i>
-            <span>Mensagens</span>
+        <a href="{{ url_for('correspondencias') }}" class="{% if request.endpoint == 'correspondencias' %}active{% endif %}">
+            <i class="fas fa-mail-bulk"></i>
+            <span>Correspondências</span>
         </a>
     </nav>
 </body>
