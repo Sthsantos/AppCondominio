@@ -2,12 +2,90 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Meta tags para PWA -->
+    <meta name="theme-color" content="#1abc9c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
     <title>Painel de Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js"></script>
+    <style>
+        /* Ajustes para o cabeçalho */
+        .navbar {
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50px;
+            background-color: #2c3e50; /* Mantida a cor original */
+            color: white;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .logo {
+            font-size: 1.2em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .user-info span {
+            font-size: 1em;
+        }
+
+        .logout-icon {
+            color: white;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .logout-icon:hover {
+            color: #ddd;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 0.75rem;
+            }
+            .logo {
+                font-size: 1em;
+                max-width: 85%;
+            }
+        }
+
+        /* Ajuste para o conteúdo principal não sobrepor o cabeçalho */
+        main {
+            margin-top: 60px;
+        }
+    </style>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
@@ -68,7 +146,7 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo"></div>
+            <div class="logo">Residencial Costa Verde</div>
             <div class="user-info">
                 {% if usuario %}
                     <span>{{ usuario['nome'] }}</span>
@@ -81,17 +159,10 @@
     <!-- Menu Lateral -->
     <nav class="sidebar">
         <ul>
-            <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a></li>
-            <li><a href="{{ url_for('perfil') }}"><i class="fas fa-user"></i> Perfil</a></li>
             <li><a href="{{ url_for('configuracoes') }}"><i class="fas fa-cog"></i> Configurações</a></li>
             <li><a href="{{ url_for('manutencao') }}"><i class="fas fa-wrench"></i> Manutenção</a></li>
             <li><a href="{{ url_for('pagamentos') }}"><i class="fas fa-money-bill-wave"></i> Pagamentos</a></li>
-            <li><a href="{{ url_for('correspondencias') }}"><i class="fas fa-envelope"></i> Correspondências</a></li>
-            <li><a href="{{ url_for('mensagens') }}"><i class="fas fa-envelope"></i> Mensagens</a></li>
             <li><a href="{{ url_for('feedback') }}"><i class="fas fa-comments"></i> Feedback</a></li>
-            <li><a href="{{ url_for('moradores') }}"><i class="fas fa-users"></i> Moradores</a></li>
-            <li><a href="{{ url_for('forum') }}"><i class="fas fa-comment-dots"></i> Fórum</a></li>
-            <li><a href="{{ url_for('anuncios') }}"><i class="fas fa-bullhorn"></i> Anúncios</a></li>
             {% if session.get('tipo_usuario') == 'admin' %}
                 <li><a href="{{ url_for('comunicacao') }}"><i class="fas fa-bullhorn"></i> Comunicação</a></li>
                 <li><a href="{{ url_for('relatorios') }}"><i class="fas fa-chart-bar"></i> Relatórios</a></li>
@@ -121,7 +192,7 @@
             <div class="avisos">
                 {% if avisos|length > 0 %}
                     <ul>
-                        {% for aviso in avisos|slice(0, 3) %}
+                        {% for aviso in avisos %}
                             <li>
                                 <strong>{{ aviso['titulo'] }}</strong> - {{ aviso['data_envio'] }}<br>
                                 <p>{{ aviso['mensagem']|truncate(100) }}</p>
@@ -160,6 +231,9 @@
             <a href="{{ url_for('mensagens') }}" class="feature-link">
                 <div class="feature">
                     <i class="fas fa-comment-alt feature-icon"></i>
+                    {% if mensagens_nao_lidas > 0 %}
+                        <span class="badge">{{ mensagens_nao_lidas }}</span>
+                    {% endif %}
                     <h3>Mensagens</h3>
                 </div>
             </a>
@@ -174,6 +248,9 @@
         </a>
         <a href="{{ url_for('anuncios') }}" class="{% if request.endpoint == 'anuncios' %}active{% endif %}">
             <i class="fas fa-bullhorn"></i>
+            {% if anuncios_nao_lidos > 0 %}
+                <span class="badge">{{ anuncios_nao_lidos }}</span>
+            {% endif %}
             <span>Anúncios</span>
         </a>
         <a href="{{ url_for('reservas') }}" class="{% if request.endpoint == 'reservas' %}active{% endif %}">
@@ -182,6 +259,9 @@
         </a>
         <a href="{{ url_for('correspondencias') }}" class="{% if request.endpoint == 'correspondencias' %}active{% endif %}">
             <i class="fas fa-mail-bulk"></i>
+            {% if correspondencias_nao_lidas > 0 %}
+                <span class="badge">{{ correspondencias_nao_lidas }}</span>
+            {% endif %}
             <span>Correspondências</span>
         </a>
     </nav>
