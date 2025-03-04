@@ -13,6 +13,39 @@
     <title>Login - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Ajustes específicos para a página de login no iPhone */
+        .navbar {
+            padding: 0.75rem 1rem; /* Reduzido para evitar sobreposição */
+            display: flex;
+            justify-content: center; /* Centraliza o logo */
+            align-items: center;
+            min-height: 50px; /* Altura mínima ajustada */
+        }
+
+        .logo {
+            font-size: 1.2em; /* Tamanho reduzido para telas menores */
+            font-weight: 600;
+            color: var(--link-color);
+            text-align: center;
+            white-space: nowrap; /* Evita quebra de linha */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Adiciona "..." se o texto for muito longo */
+            max-width: 90%; /* Limita a largura para evitar embolar */
+        }
+
+        /* Media query para iPhone e telas menores */
+        @media screen and (max-width: 480px) {
+            .navbar {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .logo {
+                font-size: 1em; /* Ainda menor em telas pequenas */
+                max-width: 85%;
+            }
+        }
+    </style>
     <script>
         // Registro do Service Worker
         if ('serviceWorker' in navigator) {
