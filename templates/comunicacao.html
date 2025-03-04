@@ -2,17 +2,47 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <!-- Meta tags para PWA -->
     <meta name="theme-color" content="#1abc9c">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
     <title>Comunicação - Residencial Costa Verde</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Ajustes no cabeçalho */
+        .navbar {
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50px;
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        .logo {
+            font-size: 1.2em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.5rem 0.75rem;
+            }
+            .logo {
+                font-size: 1em;
+                max-width: 85%;
+            }
+        }
+
         /* Estilo do Modal Moderno */
         .modal {
             display: none;
@@ -108,7 +138,7 @@
             form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
         }
 
-        let currentForm = null; // Variável global para armazenar o formulário atual
+        let currentForm = null;
 
         function showDeleteModal(id, type) {
             const modal = document.getElementById('delete-modal');
@@ -118,7 +148,7 @@
                 return;
             }
             console.log('Abrindo modal para ID:', id, 'do tipo:', type);
-            currentForm = form; // Armazena o formulário atual
+            currentForm = form;
             modal.style.display = 'flex';
         }
 
@@ -135,7 +165,7 @@
         function hideDeleteModal() {
             const modal = document.getElementById('delete-modal');
             modal.style.display = 'none';
-            currentForm = null; // Limpa o formulário atual
+            currentForm = null;
         }
 
         function toggleCorrespondencia() {
