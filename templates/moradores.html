@@ -6,6 +6,138 @@
     <title>Moradores Cadastrados - Administração de Condomínios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilo do Modal Moderno (mantido como estava) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-content h3 {
+            margin: 0 0 15px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .modal-content p {
+            margin: 0 0 20px;
+            color: #666;
+            font-size: 1em;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .confirm-delete, .cancel-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .confirm-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .confirm-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .cancel-modal {
+            background-color: #ccc;
+            color: #333;
+        }
+
+        .cancel-modal:hover {
+            background-color: #bbb;
+        }
+
+        /* Estilo para a lista expansível */
+        .moradores-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .morador-item {
+            margin-bottom: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #ffffff;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .morador-header {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8fafc;
+            transition: background-color 0.3s ease;
+        }
+
+        .morador-header:hover {
+            background-color: #ecf0f1;
+        }
+
+        .morador-header span {
+            font-weight: 500;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .morador-details {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 15px;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .morador-details.active {
+            max-height: 500px; /* Valor alto para garantir que expanda completamente */
+            padding: 15px;
+        }
+
+        .morador-details p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #2c3e50;
+        }
+
+        .morador-details strong {
+            color: #1abc9c;
+        }
+    </style>
     <script>
         function toggleEditForm(moradorId) {
             const form = document.getElementById('edit-form-' + moradorId);
@@ -32,6 +164,11 @@
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
+        }
+
+        function toggleDetails(moradorId) {
+            const details = document.getElementById('details-' + moradorId);
+            details.classList.toggle('active');
         }
     </script>
 </head>
@@ -85,31 +222,21 @@
             <div class="moradores-table-container">
                 <h2>Lista de Moradores</h2>
                 {% if moradores|length > 0 %}
-                    <table class="moradores-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Apartamento</th>
-                                <th>Número da Garagem</th>
-                                <th>Tipo de Ocupação</th>
-                                {% if session.get('tipo_usuario') == 'admin' %}
-                                    <th>Email</th>
-                                    <th>Telefone</th>
-                                    <th>Ações</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for morador in moradores %}
-                                <tr>
-                                    <td>{{ morador['nome'] }}</td>
-                                    <td>{{ morador['numero'] or 'Não informado' }}</td>
-                                    <td>{{ morador['garagem'] or 'Não informado' }}</td>
-                                    <td>{{ morador['tipo_ocupacao'] or 'Não informado' }}</td>
+                    <ul class="moradores-list">
+                        {% for morador in moradores %}
+                            <li class="morador-item">
+                                <div class="morador-header" onclick="toggleDetails({{ morador['id'] }})">
+                                    <span>{{ morador['nome'] }}</span>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div id="details-{{ morador['id'] }}" class="morador-details">
+                                    <p><strong>Apartamento:</strong> {{ morador['numero'] or 'Não informado' }}</p>
+                                    <p><strong>Número da Garagem:</strong> {{ morador['garagem'] or 'Não informado' }}</p>
+                                    <p><strong>Tipo de Ocupação:</strong> {{ morador['tipo_ocupacao'] or 'Não informado' }}</p>
                                     {% if session.get('tipo_usuario') == 'admin' %}
-                                        <td>{{ morador['email'] }}</td>
-                                        <td>{{ morador['telefone'] or 'Não informado' }}</td>
-                                        <td>
+                                        <p><strong>Email:</strong> {{ morador['email'] }}</p>
+                                        <p><strong>Telefone:</strong> {{ morador['telefone'] or 'Não informado' }}</p>
+                                        <div class="morador-actions">
                                             <button onclick="toggleEditForm({{ morador['id'] }})" class="btn-edit">
                                                 <i class="fas fa-edit"></i> Editar
                                             </button>
@@ -117,51 +244,45 @@
                                                 <i class="fas fa-trash"></i> Excluir
                                             </button>
                                             <form id="delete-form-{{ morador['id'] }}" method="POST" action="{{ url_for('excluir_morador', morador_id=morador['id']) }}" style="display: none;"></form>
-                                        </td>
+                                        </div>
+                                        <div id="edit-form-{{ morador['id'] }}" class="edit-form" style="display: none;">
+                                            <form method="POST" action="{{ url_for('editar_morador', morador_id=morador['id']) }}">
+                                                <div class="form-group">
+                                                    <label for="nome_{{ morador['id'] }}"><i class="fas fa-user"></i> Nome:</label>
+                                                    <input type="text" id="nome_{{ morador['id'] }}" name="nome" value="{{ morador['nome'] }}" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="email_{{ morador['id'] }}"><i class="fas fa-envelope"></i> Email:</label>
+                                                    <input type="email" id="email_{{ morador['id'] }}" name="email" value="{{ morador['email'] }}" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="telefone_{{ morador['id'] }}"><i class="fas fa-phone"></i> Telefone:</label>
+                                                    <input type="text" id="telefone_{{ morador['id'] }}" name="telefone" value="{{ morador['telefone'] or '' }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="rua_{{ morador['id'] }}"><i class="fas fa-road"></i> Rua:</label>
+                                                    <input type="text" id="rua_{{ morador['id'] }}" name="rua" value="{{ morador['rua'] or '' }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="numero_{{ morador['id'] }}"><i class="fas fa-home"></i> Número:</label>
+                                                    <input type="text" id="numero_{{ morador['id'] }}" name="numero" value="{{ morador['numero'] or '' }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="garagem_{{ morador['id'] }}"><i class="fas fa-car"></i> Garagem:</label>
+                                                    <input type="text" id="garagem_{{ morador['id'] }}" name="garagem" value="{{ morador['garagem'] or '' }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="tipo_ocupacao_{{ morador['id'] }}"><i class="fas fa-user-tag"></i> Tipo de Ocupação:</label>
+                                                    <input type="text" id="tipo_ocupacao_{{ morador['id'] }}" name="tipo_ocupacao" value="{{ morador['tipo_ocupacao'] or '' }}">
+                                                </div>
+                                                <input type="submit" value="Salvar Alterações" class="btn-login">
+                                            </form>
+                                        </div>
                                     {% endif %}
-                                </tr>
-                                {% if session.get('tipo_usuario') == 'admin' %}
-                                    <tr>
-                                        <td colspan="{% if session.get('tipo_usuario') == 'admin' %}7{% else %}4{% endif %}">
-                                            <div id="edit-form-{{ morador['id'] }}" class="edit-form" style="display: none;">
-                                                <form method="POST" action="{{ url_for('editar_morador', morador_id=morador['id']) }}">
-                                                    <div class="form-group">
-                                                        <label for="nome_{{ morador['id'] }}"><i class="fas fa-user"></i> Nome:</label>
-                                                        <input type="text" id="nome_{{ morador['id'] }}" name="nome" value="{{ morador['nome'] }}" required>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="email_{{ morador['id'] }}"><i class="fas fa-envelope"></i> Email:</label>
-                                                        <input type="email" id="email_{{ morador['id'] }}" name="email" value="{{ morador['email'] }}" required>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="telefone_{{ morador['id'] }}"><i class="fas fa-phone"></i> Telefone:</label>
-                                                        <input type="text" id="telefone_{{ morador['id'] }}" name="telefone" value="{{ morador['telefone'] or '' }}">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="rua_{{ morador['id'] }}"><i class="fas fa-road"></i> Rua:</label>
-                                                        <input type="text" id="rua_{{ morador['id'] }}" name="rua" value="{{ morador['rua'] or '' }}">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="numero_{{ morador['id'] }}"><i class="fas fa-home"></i> Número:</label>
-                                                        <input type="text" id="numero_{{ morador['id'] }}" name="numero" value="{{ morador['numero'] or '' }}">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="garagem_{{ morador['id'] }}"><i class="fas fa-car"></i> Garagem:</label>
-                                                        <input type="text" id="garagem_{{ morador['id'] }}" name="garagem" value="{{ morador['garagem'] or '' }}">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="tipo_ocupacao_{{ morador['id'] }}"><i class="fas fa-user-tag"></i> Tipo de Ocupação:</label>
-                                                        <input type="text" id="tipo_ocupacao_{{ morador['id'] }}" name="tipo_ocupacao" value="{{ morador['tipo_ocupacao'] or '' }}">
-                                                    </div>
-                                                    <input type="submit" value="Salvar Alterações" class="btn-login">
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
                     <p class="no-data">Nenhum morador cadastrado no momento.</p>
                 {% endif %}
