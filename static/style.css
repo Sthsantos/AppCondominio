@@ -33,19 +33,19 @@ header {
 /* Navbar */
 .navbar {
     background-color: var(--header-color);
-    padding: 1rem 1.5rem; /* Aumentei o padding lateral para mais espaço */
+    padding: 1rem 1.5rem;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    box-sizing: border-box; /* Garante que o padding não aumente a largura total */
+    box-sizing: border-box;
     z-index: 1000;
     box-shadow: 0 4px 12px var(--shadow-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
-    min-height: 60px; /* Altura mínima para evitar cortes */
+    min-height: 60px;
 }
 
 /* Botão de toggle do menu lateral */
@@ -71,7 +71,7 @@ header {
     color: var(--link-color);
     text-align: center;
     letter-spacing: 1px;
-    flex-grow: 1; /* Permite que o logo ocupe o espaço disponível */
+    flex-grow: 1;
 }
 
 /* User Info */
@@ -79,8 +79,8 @@ header {
     display: flex;
     align-items: center;
     gap: 10px;
-    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
-    padding-right: 10px; /* Espaço extra à direita para evitar cortes */
+    white-space: nowrap;
+    padding-right: 10px;
 }
 
 .user-info span {
@@ -152,7 +152,7 @@ header {
 
 /* Main Content */
 main {
-    margin-top: 70px; /* Mantido para acomodar o header fixo */
+    margin-top: 70px;
     padding: 20px;
 }
 
@@ -314,7 +314,7 @@ main {
     display: none;
 }
 
-/* Bottom Navigation */
+/* Bottom Navigation - Quadradinhos menores para dispositivos móveis */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -323,7 +323,7 @@ main {
     background: var(--secondary-color);
     display: flex;
     justify-content: space-around;
-    padding: 10px 0;
+    padding: 5px 0; /* Reduzido de 10px para 5px */
     box-shadow: 0 -4px 12px var(--shadow-color);
     z-index: 1000;
     border-top: 1px solid var(--border-color);
@@ -334,7 +334,7 @@ main {
     text-decoration: none;
     text-align: center;
     flex: 1;
-    padding: 8px;
+    padding: 3px; /* Reduzido de 8px para 3px */
     transition: all 0.3s ease;
     position: relative;
 }
@@ -345,13 +345,13 @@ main {
 }
 
 .bottom-nav i {
-    font-size: 1.5em;
+    font-size: 18px; /* Reduzido de 1.5em (~24px) para 18px */
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 3px; /* Reduzido de 4px para 3px */
 }
 
 .bottom-nav span {
-    font-size: 0.85em;
+    font-size: 10px; /* Reduzido de 0.85em (~13.6px) para 10px */
     font-weight: 500;
 }
 
