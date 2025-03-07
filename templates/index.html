@@ -65,6 +65,17 @@
         main {
             margin-top: 60px; /* Altura aproximada do cabeçalho, ajuste conforme necessário */
         }
+
+        /* Estilo para a mensagem de adicionar à tela inicial */
+        .add-to-home-screen {
+            text-align: center;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin: 20px auto;
+            max-width: 600px;
+            font-size: 1em;
+        }
     </style>
     <!-- PushAlert -->
     <script type="text/javascript">
@@ -115,7 +126,6 @@
         });
 
         if ('serviceWorker' in navigator) {
-            // O PushAlert requer o sw.js na raiz (/sw.js). Ajuste o caminho se necessário.
             navigator.serviceWorker.register('/static/sw.js')
                 .then((reg) => {
                     console.log('Service Worker registrado', reg);
@@ -176,6 +186,12 @@
                 {% endif %}
             </h1>
         </section>
+
+        <!-- Mensagem para adicionar à tela inicial -->
+        <div class="add-to-home-screen">
+            Add <strong>Residencial Costa Verde App</strong> to your Home Screen to get regular updates. 
+            Tap Share <i class="fas fa-share-square"></i> and then <strong>Add to Home Screen</strong> <i class="fas fa-plus-square"></i>
+        </div>
 
         <!-- Comunicados -->
         <section class="comunicados">
