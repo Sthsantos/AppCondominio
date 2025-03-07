@@ -66,6 +66,16 @@
             margin-top: 60px; /* Altura aproximada do cabeçalho, ajuste conforme necessário */
         }
     </style>
+    <!-- PushAlert -->
+    <script type="text/javascript">
+        (function(d, t) {
+            var g = d.createElement(t),
+                s = d.getElementsByTagName(t)[0];
+            g.src = "https://cdn.pushalert.co/integrate_f9529f9f68da50c17aacf8c89c06491b.js";
+            s.parentNode.insertBefore(g, s);
+        }(document, "script"));
+    </script>
+    <!-- End PushAlert -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBao-CekS4U-YyEKF8sZqzWbq1m9NqRK1s",
@@ -105,6 +115,7 @@
         });
 
         if ('serviceWorker' in navigator) {
+            // O PushAlert requer o sw.js na raiz (/sw.js). Ajuste o caminho se necessário.
             navigator.serviceWorker.register('/static/sw.js')
                 .then((reg) => {
                     console.log('Service Worker registrado', reg);
