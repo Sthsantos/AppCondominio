@@ -1,1 +1,11 @@
-importScripts("https://cdn.pushalert.co/sw-79831.js");
+self.addEventListener('install', (event) => {
+    console.log('Service Worker instalado');
+});
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return new Response('Offline');
+        })
+    );
+});
